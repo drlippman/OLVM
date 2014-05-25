@@ -3,31 +3,31 @@
 <head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" type="text/javascript"></script>
 <script type="text/javascript">
-var Dh = 4; var Nh = 1; var hloc=null; var dx; var snap = true;
-var Dv = 3; var Nv = 1; var vloc = null; var dy;
+var Db = 4; var Nb = 1; var bloc=null; var db; var snap = true;
+var Da = 3; var Na = 1; var aloc = null; var da;
 var partsingular = ["","whole","half","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth","eleventh","twelfth"];
 var partplural = ["","wholes","halves","thirds","fourths","fifths","sixths","sevenths","eighths","ninths","tenths","elevenths","twelfths"];
 var wordnames = ["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen","twenty","twenty one","twenty two","twenty three","twenty four"];
 
 var w = 580;
-var h = 580;
-var hstart = 70;
-var vstart = 40;
+var h = 200;
+var hstart = 10;
+var vstart = 55;
 var botspace = 90;
 var rspace = 90;
 	
-var Dchg = [[hstart-10,5,"upDv"],[hstart-10,19,"downDv"],[w-rspace+5,h-botspace-12,"upDh"],[w-rspace+5,h-botspace+2,"downDh"]];
+var Dchg = [[w-rspace+5,vstart-12,"upDa"],[w-rspace+5,vstart+2,"downDa"],[w-rspace+5,h-botspace-12,"upDb"],[w-rspace+5,h-botspace+2,"downDb"]];
 
 function changeD(el) {
-	if (el=="upDv" && Dv<12) {
-		Dv++;
-	} else if (el=="downDv" && Dv>1) {
-		Dv--;
+	if (el=="upDa" && Da<12) {
+		Da++;
+	} else if (el=="downDa" && Da>1) {
+		Da--;
 	}
-	if (el=="upDh" && Dh<12) {
-		Dh++;
-	} else if (el=="downDh" && Dh>1) {
-		Dh--;
+	if (el=="upDb" && Db<12) {
+		Db++;
+	} else if (el=="downDb" && Db>1) {
+		Db--;
 	}
 	redrawPic(el);
 }
@@ -41,41 +41,41 @@ function redrawPic(active) {
 	ctx.fillRect(0,0,w,h);
 	
 	//draw controls
-	if (Dv==12) {
+	if (Da==12) {
 		ctx.fillStyle = "#CCCCCC";
-	} else if (active=="upDv") {
+	} else if (active=="upDa") {
 		ctx.fillStyle = "#0000FF";
 	} else {
 		ctx.fillStyle = "#000000";
 	}
 	ctx.beginPath();
-	ctx.moveTo(hstart-10,15);
-	ctx.lineTo(hstart+10,15);
-	ctx.lineTo(hstart,5);
+	ctx.moveTo(w-rspace+5, vstart-2);
+	ctx.lineTo(w-rspace+25, vstart-2);
+	ctx.lineTo(w-rspace+15, vstart-12);
 	ctx.fill();
 	
-	if (Dv==1) {
+	if (Da==1) {
 		ctx.fillStyle = "#CCCCCC";
-	} else if (active=="downDv") {
+	} else if (active=="downDa") {
 		ctx.fillStyle = "#0000FF";
 	} else {
 		ctx.fillStyle = "#000000";
 	}
 	ctx.beginPath();
-	ctx.moveTo(hstart-10,19);
-	ctx.lineTo(hstart+10,19);
-	ctx.lineTo(hstart,29);
+	ctx.moveTo(w-rspace+5, vstart+2);
+	ctx.lineTo(w-rspace+25, vstart+2);
+	ctx.lineTo(w-rspace+15, vstart+12);
 	ctx.fill();
 	
 	ctx.fillStyle = "#000000";
 	ctx.textAlign = 'left';
 	ctx.textBaseline = 'middle';
-	ctx.fillText("D = "+Dv, hstart+15, 17);
+	ctx.fillText("D = "+Da, w-rspace+30, vstart);
 	
 	//horiz
-	if (Dh==12) {
+	if (Db==12) {
 		ctx.fillStyle = "#CCCCCC";
-	} else if (active=="upDh") {
+	} else if (active=="upDb") {
 		ctx.fillStyle = "#0000FF";
 	} else {
 		ctx.fillStyle = "#000000";
@@ -86,9 +86,9 @@ function redrawPic(active) {
 	ctx.lineTo(w-rspace+15, h-botspace-12);
 	ctx.fill();
 	
-	if (Dh==1) {
+	if (Db==1) {
 		ctx.fillStyle = "#CCCCCC";
-	} else if (active=="downDh") {
+	} else if (active=="downDb") {
 		ctx.fillStyle = "#0000FF";
 	} else {
 		ctx.fillStyle = "#000000";
@@ -102,49 +102,28 @@ function redrawPic(active) {
 	ctx.fillStyle = "#000000";
 	ctx.textAlign = 'left';
 	ctx.textBaseline = 'middle';
-	ctx.fillText("D = "+Dh, w-rspace+30, h-botspace);
+	ctx.fillText("D = "+Db, w-rspace+30, h-botspace);
 	
 	
-	dy = (h - vstart - botspace)/(2*Dv); 
+	da = (w - hstart - rspace)/(2*Da); 
 	
 	toff = vstart;
 	//spacing
-	dx = (w - hstart - rspace)/(2*Dh);
+	db = (w - hstart - rspace)/(2*Db);
 	
-	if (hloc==null) {
-		hloc = hstart+dx*Nh;
+	if (bloc==null) {
+		bloc = hstart+db*Nb;
 	}
-	if (vloc==null) {
-		vloc = h-botspace-dy*Nv;
+	if (aloc==null) {
+		aloc = hstart+da*Na;
 	}
-	//draw active region
-	ctx.beginPath();
-	ctx.strokeStyle = 'rgb(0,150,0)';
-	ctx.fillStyle = 'rgb(200,255,200)';
-	ctx.lineWidth = 3;
-	ctx.fillRect(hstart,vloc,hloc-hstart,h-botspace-vloc);
-	ctx.strokeRect(hstart,vloc,hloc-hstart,h-botspace-vloc);
-	
-	//draw grid
-	ctx.beginPath();
-	ctx.lineWidth = 1;
-	ctx.strokeStyle = '#aaaaaa';
-	for (var i=1;i<=2*Dh;i++) {
-		ctx.moveTo(hstart+i*dx,vstart);
-		ctx.lineTo(hstart+i*dx,h-botspace-10);
-	}
-	for (var i=0;i<2*Dv;i++) {
-		ctx.moveTo(w-rspace,vstart+i*dy);
-		ctx.lineTo(hstart+10,vstart+i*dy);
-	}
-	ctx.stroke();
 	
 	//draw main numberline
 	ctx.strokeStyle = '#000000';
 	ctx.lineWidth = 3;
 	ctx.beginPath();
 	ctx.moveTo(hstart,vstart);
-	ctx.lineTo(hstart,h-botspace);
+	ctx.lineTo(w-rspace,vstart);
 	ctx.stroke();
 	ctx.beginPath();
 	ctx.moveTo(hstart,h-botspace);
@@ -157,91 +136,111 @@ function redrawPic(active) {
 	ctx.fillText("1",hstart + .5*(w-rspace-hstart),h-botspace+15);
 	ctx.fillText("2",w-rspace,h-botspace+15);
 	
-	ctx.textAlign = 'right';
-	ctx.textBaseline = 'middle';
-	ctx.fillText("0",hstart-15,h-botspace);
-	ctx.fillText("1",hstart-15,vstart + .5*(h-botspace-vstart));
-	ctx.fillText("2",hstart-15,vstart);
+	ctx.fillText("0",hstart,vstart+15);
+	ctx.fillText("1",hstart + .5*(w-rspace-hstart),vstart+15);
+	ctx.fillText("2",w-rspace,vstart+15);
 	
 	//draw ticks
 	ctx.beginPath();
-	ctx.moveTo(hstart-10,vstart); ctx.lineTo(w-rspace,vstart);
-	ctx.moveTo(hstart-10,vstart + .5*(h-botspace-vstart)); ctx.lineTo(w-rspace,vstart + .5*(h-botspace-vstart));
-	ctx.moveTo(hstart-10,h-botspace); ctx.lineTo(w-rspace,h-botspace);
-	ctx.moveTo(hstart,h-botspace+10); ctx.lineTo(hstart,vstart);
-	ctx.moveTo(hstart + .5*(w-rspace-hstart),h-botspace+10); ctx.lineTo(hstart + .5*(w-rspace-hstart),vstart);
-	ctx.moveTo(w-rspace,h-botspace+10); ctx.lineTo(w-rspace,vstart);
+	ctx.moveTo(hstart,h-botspace+10); ctx.lineTo(hstart,h-botspace-10);
+	ctx.moveTo(hstart + .5*(w-rspace-hstart),h-botspace+10); ctx.lineTo(hstart + .5*(w-rspace-hstart),h-botspace-10);
+	ctx.moveTo(w-rspace,h-botspace+10); ctx.lineTo(w-rspace,h-botspace-10);
+	ctx.moveTo(hstart,vstart+10); ctx.lineTo(hstart,vstart-10);
+	ctx.moveTo(hstart + .5*(w-rspace-hstart),vstart+10); ctx.lineTo(hstart + .5*(w-rspace-hstart),vstart-10);
+	ctx.moveTo(w-rspace,vstart+10); ctx.lineTo(w-rspace,vstart-10);
 	ctx.stroke();
 	
 	ctx.beginPath();
 	ctx.lineWidth = 2;
-	for (var i=1;i<2*Dh;i++) {
-		ctx.moveTo(hstart+i*dx,h-botspace-10);
-		ctx.lineTo(hstart+i*dx,h-botspace+10);
+	for (var i=1;i<2*Db;i++) {
+		ctx.moveTo(hstart+i*db,h-botspace-10);
+		ctx.lineTo(hstart+i*db,h-botspace+10);
 	}
-	for (var i=1;i<2*Dv;i++) {
-		ctx.moveTo(hstart-10,vstart+i*dy);
-		ctx.lineTo(hstart+10,vstart+i*dy);
+	for (var i=1;i<2*Da;i++) {
+		ctx.moveTo(hstart+i*da,vstart-10);
+		ctx.lineTo(hstart+i*da,vstart+10);
 	}
 	ctx.stroke();
 	
 	
-
+	//draw active line
+	ctx.beginPath();
+	ctx.strokeStyle = 'rgba(0,150,0,0.8)';
+	ctx.lineWidth = 5;
+	ctx.moveTo(hstart,vstart);
+	ctx.lineTo(aloc,vstart);
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.lineWidth = 1;
+	ctx.moveTo(aloc,vstart+10);
+	ctx.lineTo(aloc,h-botspace-20);
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.strokeStyle = 'rgba(0,0,150,0.8)';
+	ctx.moveTo(hstart,h-botspace);
+	ctx.lineTo(bloc,h-botspace);
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.lineWidth = 1;
+	ctx.moveTo(bloc,vstart+20);
+	ctx.lineTo(bloc,h-botspace-10);
+	ctx.stroke();
+	
 	//draw active dots
 	ctx.beginPath();
 	ctx.lineWidth = 1;
-	if (active=="hdot") {
+	if (active=="bdot") {
 		ctx.fillStyle = 'rgba(255,255,0,0.5)';
 	} else {
-		ctx.fillStyle = 'rgba(0,255,0,0.5)';
+		ctx.fillStyle = 'rgba(0,0,255,0.5)';
 	}
-	ctx.arc(hloc,h-botspace,7, 0, 2*Math.PI, false);
+	ctx.arc(bloc,h-botspace,7, 0, 2*Math.PI, false);
 	ctx.fill();
 	ctx.stroke();
 	ctx.beginPath();
-	if (active=="vdot") {
+	if (active=="adot") {
 		ctx.fillStyle = 'rgba(255,255,0,0.5)';
 	} else {
 		ctx.fillStyle = 'rgba(0,255,0,0.5)';
 	}
-	ctx.arc(hstart,vloc,7, 0, 2*Math.PI, false);
+	ctx.arc(aloc,vstart,7, 0, 2*Math.PI, false);
 	ctx.fill();
 	ctx.stroke();
 	
 	//show position name, if we should
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'top';
-	var bits = (hloc - hstart)/dx;
-	var pixoff = (Math.abs(bits - Math.round(bits))*dx);
+	var bits = (bloc - hstart)/db;
+	var pixoff = (Math.abs(bits - Math.round(bits))*db);
 	if (pixoff < 2) {
-		Nh = Math.round(bits);
+		Nb = Math.round(bits);
 		ctx.strokeStyle = '#000000';
 		ctx.lineWidth = 2;
 		ctx.beginPath();
 		ctx.fillStyle = "#cc0000";
-		ctx.fillText(Nh, hloc, h-45);
+		ctx.fillText(Nb, bloc, h-45);
 		ctx.beginPath();
-		ctx.moveTo(hloc - 12, h-25);
-		ctx.lineTo(hloc + 12, h-25);
+		ctx.moveTo(bloc - 12, h-25);
+		ctx.lineTo(bloc + 12, h-25);
 		ctx.stroke();
 		ctx.fillStyle = "#0000cc";
-		ctx.fillText(Dh, hloc, h-22);
+		ctx.fillText(Db, bloc, h-22);
 	}
-	var bits = (h-botspace - vloc)/dy;
-	var pixoff = (Math.abs(bits - Math.round(bits))*dy);
+	var bits = (aloc-hstart)/da;
+	var pixoff = (Math.abs(bits - Math.round(bits))*da);
 	if (pixoff < 2) {
-		Nv = Math.round(bits);
+		Na = Math.round(bits);
 		ctx.strokeStyle = '#000000';
 		ctx.lineWidth = 2;
 		ctx.beginPath();
 		ctx.fillStyle = "#cc0000";
-		ctx.fillText(Nv, 20,vloc-20);
+		ctx.fillText(Na, aloc, vstart-55);
 		ctx.beginPath();
-		ctx.moveTo(20-12, vloc);
-		ctx.lineTo(20+12, vloc);
+		ctx.moveTo(aloc-12, vstart-35);
+		ctx.lineTo(aloc+12, vstart-35);
 		ctx.stroke();
 		ctx.fillStyle = "#0000cc";
-		ctx.fillText(Dv, 20, vloc+2);
+		ctx.fillText(Da, aloc, vstart-33);
 	}
 	if (qn != "") {
 		sendit();
@@ -288,7 +287,7 @@ function onmousedown(e) {
 }
 function onmouseup(e) {
 	mouseisdown = "";
-	$("body").css("cursor","");
+	$("boda").css("cursor","");
 	redrawPic();
 }
 var isintarget = false;
@@ -296,35 +295,35 @@ var isinChg = false;
 function onmousemove(e) {
 	if (mouseisdown!="") {
 		var wpos = $("#thecanvas").offset();
-		if (mouseisdown=="hdot") {	
+		if (mouseisdown=="bdot") {	
 			var xpos = e.pageX - wpos.left;
 			if (xpos>w-rspace) {xpos=w-rspace;}
 			if (xpos<hstart) {xpos=hstart;}
-			var bits = (xpos - hstart)/dx;
-			var pixoff = (Math.abs(bits - Math.round(bits))*dx);
+			var bits = (xpos - hstart)/db;
+			var pixoff = (Math.abs(bits - Math.round(bits))*db);
 			if (pixoff < 8) {
-				Nh = Math.round(bits);
-				hloc = hstart+dx*Nh;
-				redrawPic("hdot");
+				Nb = Math.round(bits);
+				bloc = hstart+db*Nb;
+				redrawPic("bdot");
 			} else if (!snap) {
-				Nh = bits;
-				hloc = hstart+dx*Nh;
-				redrawPic("hdot");
+				Nb = bits;
+				bloc = hstart+db*Nb;
+				redrawPic("bdot");
 			}
-		} else if (mouseisdown=="vdot") {
-			var ypos = e.pageY - wpos.top;
-			if (ypos<vstart) {ypos=vstart;}
-			if (ypos>h-botspace) {ypos=h-botspace;}
-			var bits = (h-botspace - ypos)/dy;
-			var pixoff = (Math.abs(bits - Math.round(bits))*dy);
+		} else if (mouseisdown=="adot") {
+			var xpos = e.pageX - wpos.left;
+			if (xpos>w-rspace) {xpos=w-rspace;}
+			if (xpos<hstart) {xpos=hstart;}
+			var bits = (xpos - hstart)/da;
+			var pixoff = (Math.abs(bits - Math.round(bits))*da);
 			if (pixoff < 8) {
-				Nv = Math.round(bits);
-				vloc = h-botspace-dy*Nv;
-				redrawPic("vdot");
+				Na = Math.round(bits);
+				aloc = hstart+da*Na;
+				redrawPic("adot");
 			} else if (!snap) {
-				Nv = bits;
-				vloc = h-botspace-dy*Nv;
-				redrawPic("vdot");
+				Na = bits;
+				aloc = hstart+da*Na;
+				redrawPic("adot");
 			}
 		}
 		e.preventDefault();
@@ -333,17 +332,13 @@ function onmousemove(e) {
 		var el = isInDragTarget(e);
 		if (el != "") {
 			if (!isintarget) {
-				if (el=="vdot") {
-					$("body").css("cursor","ns-resize");
-				} else {
-					$("body").css("cursor","ew-resize");
-				}
+				$("boda").css("cursor","ew-resize");
 				isintarget = true;
 				redrawPic(el);
 			}
 		} else if (isintarget) {
 			isintarget = false;
-			$("body").css("cursor","");
+			$("boda").css("cursor","");
 			redrawPic();
 		}
 		el = isInChgD(e);
@@ -363,10 +358,10 @@ function isInDragTarget(e) {
 	var wpos = $("#thecanvas").offset();
 	var xpos = e.pageX - wpos.left;
 	var ypos = e.pageY - wpos.top;
-	if (distsqr(xpos,ypos,hloc,h-botspace)<(istouch?100:50)) {
-		return "hdot"
-	} else if (distsqr(xpos,ypos,hstart,vloc)<(istouch?100:50)) {
-		return "vdot"
+	if (distsqr(xpos,ypos,bloc,h-botspace)<(istouch?100:50)) {
+		return "bdot"
+	} else if (distsqr(xpos,ypos,aloc,vstart)<(istouch?100:50)) {
+		return "adot"
 	} else {
 		return "";
 	}
@@ -390,12 +385,12 @@ function isInChgD(e) {
 
 $(function() {
 	$("#canvaswrapper").on("mousedown", onmousedown).on("touchstart", ontouchstart);
-	$("body").on("mouseup touchend", onmouseup);
+	$("boda").on("mouseup touchend", onmouseup);
 	$("#canvaswrapper").on("mousemove", onmousemove).on("touchmove", ontouchmove);
 });
 
 
-function getParameterByName(name) {
+function getParameterByNbme(name) {
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
         results = regex.exec(location.search);
@@ -404,15 +399,15 @@ function getParameterByName(name) {
 
 var qn;
 $(function() {
- 	qn = getParameterByName("qn");
+ 	qn = getParameterByNbme("qn");
  	if (qn != "") {
- 		Nh = getParameterByName("Nh");
- 		Dh = getParameterByName("Dh");
- 		Nv = getParameterByName("Nv");
- 		Dv = getParameterByName("Dv");
- 		hloc = null;
- 		vloc = null;
-  		if (getParameterByName("snap")=="false") {
+ 		Na = getParameterByNbme("Na");
+ 		Da = getParameterByNbme("Da");
+ 		Nb = getParameterByNbme("Nb");
+ 		Db = getParameterByNbme("Db");
+ 		bloc = null;
+ 		aloc = null;
+  		if (getParameterByNbme("snap")=="false") {
   			snap = false;
   		}
  		redrawPic();
@@ -420,7 +415,7 @@ $(function() {
 })
 
 function sendit(){
-	var returnstring = qn + "::" + Nh + "," + Dh + "," + Nv + "," + Dv;
+	var returnstring = qn + "::" + Na + "," + Da + "," + Nb + "," + Db;
 	parent.postMessage(returnstring,"*");
 }
 
@@ -437,12 +432,12 @@ body {
 </style>
 
 </head>
-<body>
+<boda>
 <div id="canvaswrapper" style="position:relative;">
-<canvas width="580" height="580" id="thecanvas" style="position:relative;">
+<canvas width="580" height="200" id="thecanvas" style="position:relative;">
 Your browser does not support Canvas. Please use a modern browser.
 </canvas>
 </div>
-</body>
+</boda>
 </html>
 
