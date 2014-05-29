@@ -116,8 +116,8 @@ function vmnumbertilesgetcount($state) {
 //cats = array of titles for the two drop areas
 function vmsetupitemsort($numbers,$cats,$state,$qn,$part=null) {
 	if ($part !== null) {$qn = 1000*($qn)+$part;} else {$qn--;}
-	$numbers = urlencode(implode(';',$numbers));
-	$cats = urlencode(implode(';',$cats));
+	$numbers = urlencode(implode(';;',$numbers));
+	$cats = urlencode(implode(';;',$cats));
 	$initbase = "[]";
 	$initobj = "[]";
 	if ($state!="") {

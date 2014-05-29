@@ -31,7 +31,7 @@ $(function() {
 	if (initobjstring != "") {
 		initobj = $.parseJSON(initobjstring);
 	}
-	var initstr = getParameterByName("str").split(';');
+	var initstr = getParameterByName("str").split(';;');
 	var offset = 10;
 	var dy = Math.round(($("#wrapper").height()-20)/initstr.length);
 	for (var i=0;i<initstr.length;i++) {
@@ -48,7 +48,7 @@ $(function() {
 		 .appendTo('#wrapper');
 	}
 	
-	var cats = getParameterByName("cats").split(';');
+	var cats = getParameterByName("cats").split(';;');
 	for (var i=0;i<cats.length;i++) {
 		$("#cont"+i).html(cats[i]);
 	}
