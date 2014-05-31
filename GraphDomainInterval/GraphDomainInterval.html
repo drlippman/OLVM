@@ -2,40 +2,33 @@
 <html>
 <head>
 <meta name="keywords" content="Virtual Manipulative, OER, Open Educational Resource, WAMAP, MyOpenMath" />
-<meta name="description" content="This applet is a Virtual Manipulative used define intervals" />
+<meta name="description" content="This applet is a Virtual Manipulative used illustrate domain and range" />
 <meta name="author" content="David Lippman, Pierce College, Tacoma Washington" />
 <meta name="author" content="William Meacham, Scottsdale Community College, Scottsdale, Arizona" />
 <meta name="copyright" content="Copyright &copy 2014, GNU General Public License, version 2 (GPL-2.0)" />
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" type="text/javascript"></script>
 <script type="text/javascript">
 
-var xmidpoint;
-var ymidpoint;
-var xmin = -7;
-var xmax = 6;
-var xminep = 0;
-var xmaxep = 1;
-var hlocN = null;
-var hlocS = null;
-var vlocP = null;
-var vlocQ = null;
-var N = 11;
-var S = 9;
-var P = 9;
-var Q = 11;
-var lep = 2;
-var rep = 2;
-var tep = 2;
-var bep = 2;
+var xmidpoint, ymidpoint;
+var xmin = -7, xmax = 6;
+var hlocE = null, hlocW = null, vlocS = null, vlocN = null;
+var E = 11, W = 9, S = 9, N = 11;
+var Wep = 2, Eep = 2, Nep = 2, Sep = 2;
+var fWep = 0, fEep = 1;
 var border=20;
 var tborder=20;
 var snap = true;
-var width = null;
-var height = null;
+var width = null, height = null;
 var blue = "#0000FF";
 var red = "#FF0000";
 var black = "#000000";
 var green = "#00FF00";
+var eqType = 0;
+var eq = "x + 2"
+//"-5,2,-1,-3,4,7,6,-2";
+//var eq = "x + 2";
+
 function redrawPic(isactive) {
 	var canvas = $("#thecanvas");
 	var w = canvas.attr("width") - 100;
@@ -86,88 +79,164 @@ function redrawPic(isactive) {
 		ctx.fillText(-scale*(i-10),xmidpoint-7,border+i*dy-10);
 	}
 	
-	if (hlocN==null) {
-		hlocN = border+dx*N;
+	if (hlocE==null) {
+		hlocE = border+dx*E;
 	}
-	if (hlocS==null) {
-		hlocS = border+dx*S;
+	if (hlocW==null) {
+		hlocW = border+dx*W;
 	}
-	if (vlocP==null) {
-		vlocP = h - (tborder+dx*P);
+	if (vlocS==null) {
+		vlocS = h - (tborder+dx*S);
 	}
-	if (vlocQ==null) {
-		vlocQ = h - (tborder+dx*Q);
+	if (vlocN==null) {
+		vlocN = h - (tborder+dx*N);
 	}
 	
 	//draw right point
-	endpoint(rep,0,hlocN,ctx);
+	endpoint(Eep,0,hlocE,ctx);
 
 	// draw left point
-	endpoint(lep,1,hlocS,ctx);
+	endpoint(Wep,1,hlocW,ctx);
 
 	//draw top point
-	vendpoint(tep,1,vlocQ,ctx);
+	vendpoint(Nep,1,vlocN,ctx);
 
 	// draw bottom point
-	vendpoint(bep,0,vlocP,ctx)	
+	vendpoint(Sep,0,vlocS,ctx)	
 	
 	// Draw Horiz. line
 	ctx.beginPath();
 	ctx.lineWidth = 6;
 	ctx.strokeStyle = blue;
-	ctx.moveTo(hlocN-2,ymidpoint);
-	ctx.lineTo(hlocS,ymidpoint);
+	ctx.moveTo(hlocE-2,ymidpoint);
+	ctx.lineTo(hlocW,ymidpoint);
 	ctx.stroke();
 	
 	// Draw Vertical line
 	ctx.beginPath();
 	ctx.lineWidth = 6;
 	ctx.strokeStyle = blue;
-	ctx.moveTo(xmidpoint,vlocQ);
-	ctx.lineTo(xmidpoint,vlocP);
+	ctx.moveTo(xmidpoint,vlocN);
+	ctx.lineTo(xmidpoint,vlocS);
 	ctx.stroke();
-	
+	drawGraph(ctx);
+
+	sendit();
+}
+function drawGraph(ctx) {
 	// draw graph
 	ctx.beginPath();
 	ctx.lineWidth = 2;
-	ctx.strokeStyle = green;
-
-	var xval = border+(xmin+10)*dx;
-	var yval = height - (eval("2 * Math.pow(1.2,xmin)")+11)*dy;
-	ctx.moveTo(xval,yval);
-	for (var i = xmin+.1; i <= xmax;i+=.1) {
-		xval = border+(i+10)*dx;
-		yval = height - (eval("2 * Math.pow(1.2,i)")+11)*dy;
-		ctx.lineTo(xval,yval);
+	ctx.strokeStyle = red;
+	var x;
+	var func = "";
+	if (eqType == 1) {
+		var points = eq.split(":");
+		for (var i = 0; i < points.length; i++) {
+		  	points[i] = Number(points[i]);
+		}
+		var lxval = border+(points[0]+10)*dx;
+		var lyval = height - (points[1] + 10.85)*dy;
+		var rxval = border+(points[points.length-2]+10)*dx;
+		var ryval = height - (points[points.length-1] + 10.85)*dy;
+		ctx.moveTo(lxval,lyval);
+		for (var i = 2; i < points.length; i+= 2) {
+			var xval = border+(points[i]+10)*dx;
+			var yval = height - (points[i+1]+10.85)*dy;
+			  ctx.lineTo(xval,yval);
+		}
+	} else {  
+		var points = eq.split(":");
+		switch (eqType) {
+			case 0 : func = points[0] + " * x + " + points[1]; break;
+			case 2 : func = points[0] + " * Math.pow(" + points[1] + ",x)";break;
+			case 3 : func = points[0] + " * x * x + " + points[1] + " * x + " + points[2]; break;
+			case 4 : func = points[0] + " + " + points[1] + " * (Math.log(x) / Math.log(" + points[2] + "))"; break;
+		}
+		var lxval = border+(xmin+10)*dx;
+		x = xmin;
+		var lyval = height - (eval(func)+10.85)*dy;
+		var rxval = border+(xmax+10)*dx;
+		x = xmax;
+		var ryval = height - (eval(func)+10.85)*dy;
+		ctx.moveTo(lxval,lyval);
+		for (var i = xmin+.05; i <= xmax;i+=.1) {
+			var xval = border+(i+10)*dx;
+			x = i;
+			var yval = height - (eval(func)+10.85)*dy;
+			if (yval < tborder || yval > height-tborder) {
+			  	ctx.moveTo(xval,yval);
+			} else {
+				ctx.lineTo(xval,yval);
+			}
+		}
 	}
 	ctx.stroke();
-
-	
-	// draw graph end points
-	ctx.fillStyle = "#FFFFFF";
-	xval = border+(xmin+10)*dx;
-	yval = height - (eval("2 * Math.pow(1.2,xmin)")+11)*dy;
+	switch (fWep) {
+		case 0 : drawGraphEndPoint(ctx,lxval,lyval,"#FF0000"); break;
+		case 1 : drawGraphEndPoint(ctx,lxval,lyval,"#FFFFFF"); break;
+		case 2 :
+			x = xmin;
+			var y1 = eval(func);
+			x = xmin + .1;
+			var y2 = eval(func);
+//			console.log(x + "," + );
+			drawLeftArrow(ctx,lxval,lyval,.1,y2-y1);
+	}
+	switch (fEep) {
+		case 0 : drawGraphEndPoint(ctx,rxval,ryval,"#FF0000"); break;
+		case 1 : drawGraphEndPoint(ctx,rxval,ryval,"#FFFFFF"); break;
+		case 2 : 
+			x = xmax - .1;
+			var y1 = eval(func);
+			x = xmax;
+			var y2 = eval(func);
+//			console.log(x + "," + );
+			drawRightArrow(ctx,rxval,ryval,.1,y2-y1);		
+		drawArrow(ctx.rxval,ryval,2);
+	}
+}
+	// draw function end points
+function drawGraphEndPoint(ctx,xval,yval,fillStyle) 
+{	
+	ctx.fillStyle = fillStyle;
 	ctx.moveTo(xval,yval);
 	ctx.beginPath();
-	if (xminep == 0) {
-	  ctx.fillStyle = "#00FF00";
-	}
 	ctx.arc(xval,yval,5, 0, 2*Math.PI, false);
 	ctx.fill();
 	ctx.stroke();
+}
+
+
+function drawLeftArrow(ctx,x,y,deltaX,deltaY) {
+	var slope = deltaY/deltaX;
+	var angle = Math.atan(slope);
+	var angle1 = angle + 0.6;
+	var angle2 = angle - 0.6;
+	var x1 = x + Math.cos(angle1)*20;
+	var x2 = x + Math.cos(angle2)*20;
+	var y1 = y - Math.sin(angle1)*20;
+	var y2 = y - Math.sin(angle2)*20;
 	ctx.beginPath();
-	ctx.fillStyle = "#FFFFFF";
-	if (xmaxep == 0) {
-	  ctx.fillStyle = "#00FF00";
-	}	
-	xval = border+(xmax+10)*dx;
-	yval = height - (eval("2 * Math.pow(1.2,xmax)")+11)*dy;
-	ctx.moveTo(xval,yval);
-	ctx.beginPath();
-	ctx.arc(xval,yval,5, 0, 2*Math.PI, false);
-	ctx.fill();
+	ctx.moveTo(x1,y1);
+	ctx.lineTo(x,y);
+	ctx.lineTo(x2,y2);
 	ctx.stroke();
-	sendit();
+}
+function drawRightArrow(ctx,x,y,deltaX,deltaY) {
+	var slope = deltaY/deltaX;
+	var angle = Math.atan(slope);
+	var angle1 = angle + 0.6;
+	var angle2 = angle - 0.6;
+	var x1 = x - Math.cos(angle1)*20;
+	var x2 = x - Math.cos(angle2)*20;
+	var y1 = y + Math.sin(angle1)*20;
+	var y2 = y + Math.sin(angle2)*20;
+	ctx.beginPath();
+	ctx.moveTo(x1,y1);
+	ctx.lineTo(x,y);
+	ctx.lineTo(x2,y2);
+	ctx.stroke();
 }
 
 function endpoint(type,direction,xloc,ctx) {
@@ -269,101 +338,190 @@ function ontouchmove(evt) {
 }
 
 
-var mouseisdownN = false;
+var mouseisdownE = false;
+var mouseisdownW = false;
 var mouseisdownS = false;
+var mouseisdownN = false;
 
 function onmousedown(e) {
-	if (isInDragTargetN(e)) {
-		 mouseisdownN = true;
-	}
-	if (isInDragTargetS(e)) {
+	if (isInDragTarget(e,hlocE,ymidpoint)) {
+		 mouseisdownE = true;
+	} else
+	if (isInDragTarget(e,hlocW,ymidpoint)) {
+	  	mouseisdownW = true;
+	} else
+	if (isInDragTarget(e,xmidpoint,vlocS)) {
 	  	mouseisdownS = true;
+	} else
+	if (isInDragTarget(e,xmidpoint,vlocN)) {
+	  	mouseisdownN = true;
 	}
+}
+function onmouseclick(e) {
+	if (isInDragTarget(e,hlocE,ymidpoint)) {
+		 Eep = Eep % 4 + 1;
+		 $('#rightpoint').val(Eep);
+	} else
+	if (isInDragTarget(e,hlocW,ymidpoint)) {
+		 Wep = Wep % 4 + 1;
+		 $('#leftpoint').val(Wep);
+	} else
+	if (isInDragTarget(e,xmidpoint,vlocS)) {
+		 Sep = Sep % 4 + 1;
+		 $('#bottompoint').val(Sep);
+	} else
+	if (isInDragTarget(e,xmidpoint,vlocN)) {
+		 Nep = Nep % 4 + 1;
+		 $('#leftpoint').val(Nep);	 
+	}
+	redrawpic(true);
 }
 function onmouseup(e) {
-	mouseisdownN = false;
+// if timer is less than x, call onmouseclick
+	mouseisdownE = false;
+	mouseisdownW = false;
 	mouseisdownS = false;
+	mouseisdownN = false;
+	
 	$("body").css("cursor","");
 }
-var isintargetN = false;
+var isintargetE = false;
+var isintargetW = false;
 var isintargetS = false;
+var isintargetN = false;
+
 function onmousemove(e) {
-	if (mouseisdownN) {
-		var oldhlocN = hlocN;
+	if (mouseisdownE) {
+		var oldhlocE = hlocE;
 		var xpos = e.offsetX === undefined ? e.originalEvent.layerX : e.offsetX;
 		var bits = (xpos - border)/dx;
 		var pixoff = (Math.abs(bits - Math.round(bits))*dx);
-		if (xpos > hlocS && xpos < width - 20) {
+		if (xpos > hlocW && xpos < width - 20) {
 			if (pixoff < 8) {
-				var newN = Math.round(bits);
-				if (newN > S) {
-					N = newN;
-					hlocN = border+dx*N;
+				var newE = Math.round(bits);
+				if (newE > W) {
+					E = newE;
+					hlocE = border+dx*E;
 					redrawPic(true);
 				}
 			} else if (!snap) {
-				var newN = bits;
-				if (newN > S) {
-					N = newN;
-					hlocN = border+dx*N;
+				var newE = bits;
+				if (newE > W) {
+					E = newE;
+					hlocE = border+dx*E;
+					redrawPic(true);
+				}
+			}
+		}
+		e.preventDefault();
+	} 
+	else if (mouseisdownW) {
+		var xpos = e.offsetX === undefined ? e.originalEvent.layerX : e.offsetX;
+		var bits = (xpos - border)/dx;
+		var pixoff = (Math.abs(bits - Math.round(bits))*dx);
+		if (xpos > border && xpos < hlocE) {
+			if (pixoff < 8) {
+				var newW = Math.round(bits);
+				if (newW < E) {
+					W = newW;
+					hlocW = border+dx*W;
+					redrawPic(true);
+				}
+			} else if (!snap) {
+				var newW = bits;
+				if (newW < E) {
+					W = newW;
+					hlocW = border+dx*W;
 					redrawPic(true);
 				}
 			}
 		}
 		e.preventDefault();
 	} else if (mouseisdownS) {
-		var xpos = e.offsetX === undefined ? e.originalEvent.layerX : e.offsetX;
-		var bits = (xpos - border)/dx;
-		var pixoff = (Math.abs(bits - Math.round(bits))*dx);
-		if (xpos > border && xpos < hlocN) {
+		var ypos = e.offsetY === undefined ? e.originalEvent.layerY : e.offsetY;
+		var bits = (height - tborder-ypos)/dy;
+		var pixoff = (Math.abs(bits - Math.round(bits))*dy);
+		if (ypos < height - 20 && ypos > vlocN) {
 			if (pixoff < 8) {
 				var newS = Math.round(bits);
 				if (newS < N) {
 					S = newS;
-					hlocS = border+dx*S;
+					vlocS = height - (tborder+dx*S);;
 					redrawPic(true);
 				}
 			} else if (!snap) {
 				var newS = bits;
 				if (newS < N) {
 					S = newS;
-					hlocS = border+dx*S;
+					vlocS = height - (tborder+dy*S);
 					redrawPic(true);
 				}
 			}
 		}
 		e.preventDefault();
-	} else if (isInDragTargetN(e)) {
-		if (!isintargetN) {
+	} else if (mouseisdownN) {
+		var ypos = e.offsetY === undefined ? e.originalEvent.layerY : e.offsetY;
+		var bits = (height - tborder - ypos)/dy;
+		var pixoff = (Math.abs(bits - Math.round(bits))*dy);
+		if (ypos > border && ypos < vlocS) {
+			if (pixoff < 8) {
+				var newN = Math.round(bits);
+				if (newN > S) {
+					N = newN;
+					vlocN = height - (tborder+dy*N);
+					redrawPic(true);
+				}
+			} else if (!snap) {
+				var newN = bits;
+				if (newN > S) {
+					N = newN;
+					vlocN = height - (tborder+dy*N);
+					redrawPic(true);
+				}
+			}
+		}
+		e.preventDefault();
+	} else if (isInDragTarget(e,hlocE,ymidpoint)) {  // is in right point
+		if (!isintargetE) {
 			$("body").css("cursor","ew-resize");
-			isintargetN = true;
+			isintargetE = true;
 			redrawPic(true);
 		}
-	} else if (isInDragTargetS(e)) {
-		if (!isintargetS) {
+	} else if (isInDragTarget(e,hlocW,ymidpoint)) {  // is in left point
+		if (!isintargetW) {
 			$("body").css("cursor","ew-resize");
+			isintargetW = true;
+			redrawPic(true);
+		}
+	} else if (isInDragTarget(e,xmidpoint,vlocS)) {  // is in bottom point
+		if (!isintargetS) {
+			$("body").css("cursor","ns-resize");
 			isintargetS = true;
 			redrawPic(true);
 		}
+	} else if (isInDragTarget(e,xmidpoint,vlocN)) {  // is in bottom point
+		if (!isintargetN) {
+			$("body").css("cursor","ns-resize");
+			isintargetN = true;
+			redrawPic(true);
+		}
 	}else  {
+		isintargetE = false;
+		isintargetW = false;
+		isintargetS = false;	
 		isintargetN = false;
-		isintargetS = false;
 		$("body").css("cursor","");
 		redrawPic();
 	}
 }
 
 
-function isInDragTargetN(e) {
+function isInDragTarget(e,loc1,loc2) {
 	var xpos = e.offsetX === undefined ? e.originalEvent.layerX : e.offsetX;
 	var ypos = e.offsetY === undefined ? e.originalEvent.layerY : e.offsetY;
-	return (distsqr(xpos,ypos,hlocN,ymidpoint)<60);
+	return (distsqr(xpos,ypos,loc1,loc2)<60);
 }
-function isInDragTargetS(e) {
-	var xpos = e.offsetX === undefined ? e.originalEvent.layerX : e.offsetX;
-	var ypos = e.offsetY === undefined ? e.originalEvent.layerY : e.offsetY;
-	return (distsqr(xpos,ypos,hlocS,ymidpoint)<60);
-}
+
 function distsqr(x1,y1,x2,y2) {
 	return ((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
 }
@@ -380,35 +538,35 @@ function setScale(newscale){
    redrawPic();
 }
 
-function setLeftEndPoint(newlep){
-   lep = newlep.value;
-   if (lep == 1) {
-       	S = 0;
-	hlocS = border+dx*S;
+function setLeftEndPoint(newWep){
+   Wep = newWep.value;
+   if (Wep == 1) {
+       	W = 0;
+	hlocW = border+dx*W;
    }
    redrawPic();
 }
-function setRightEndPoint(newrep){
-   rep = newrep.value;
-   if (rep == 1) {
-    	N = 20;
-	hlocN = border+dx*N;
+function setRightEndPoint(newEep){
+   Eep = newEep.value;
+   if (Eep == 1) {
+    	E = 20;
+	hlocE = border+dx*E;
    }
    redrawPic();
 }
-function setTopEndPoint(newtep){
-   tep = newtep.value;
-   if (tep == 1) {
-       	Q = 20;
-	vlocQ =  height - (tborder+dy*Q)
+function setTopEndPoint(newNep){
+   Nep = newNep.value;
+   if (Nep == 1) {
+       	N = 20;
+	vlocN =  height - (tborder+dy*N)
    }
    redrawPic();
 }
-function setBottomEndPoint(newbep){
-   bep = newbep.value;
-   if (bep == 1) {
-    	P = 0;
-	vlocP = height - (tborder+dy*P);
+function setBottomEndPoint(newSep){
+   Sep = newSep.value;
+   if (Sep == 1) {
+    	S = 0;
+	vlocS = height - (tborder+dy*S);
    }
    redrawPic();
 }
@@ -424,37 +582,62 @@ var qn;
 $(function() {
  	qn = getParameterByName("qn");
  	if (qn != "") {	
+ 	 	var preveqType = getParameterByName("eqType");
+ 	 	var preveq = getParameterByName("eq");
+ 	 	var prevXmin = getParameterByName("xmin");
+ 	 	var prevXmax = getParameterByName("xmax");
  		var prevScale = getParameterByName("scale");
- 		var prevlep = getParameterByName("lep");
- 		var prevrep = getParameterByName("rep");
- 		var prevN = getParameterByName("Nval");
- 		var prevS = getParameterByName("Sval");
+ 		var prevfWep = getParameterByName("fWep");
+ 		var prevfEep = getParameterByName("fEep");
+ 		var prevAns = getParameterByName("Ans");
+ 		if (preveqType != "") {
+ 		  	eqType = Number(preveqType);
+ 		}
+ 		if (preveq != "") {
+ 		  	eq = preveq;
+ 		}
+ 		if (prevXmin != "") {
+ 		  	xmin = Number(prevXmin);
+ 			xmax = Number(prevXmax);
+ 		}
  		if (prevScale != "") {
 			scale = Number(prevScale);
 		}
- 		if (prevN != "") {
-			N = Number(prevN)/scale + 10;
+		if (prevfWep != "") {
+			fWep = Number(prevfWep);
+			fEep = Number(prevfEep);
 		}
-		if (prevS != "") {
-			S = Number(prevS)/scale + 10;
+ 		if (prevAns != "") {
+ 		 	var ans = prevAns.split(":");
+ 		 	W = Number(ans[0])/scale + 10;
+			Wep = Number(ans[1]);
+			$('#leftpoint').val(Wep);
+			E = Number(ans[2])/scale + 10;
+			Eep = Number(ans[3]);
+			$('#rightpoint').val(Eep);
+			N = Number(ans[4])/scale + 10;
+			Nep = Number(ans[5]);
+			$('#toppoint').val(Nep);
+			S = Number(ans[6])/scale + 10;
+			Sep = Number(ans[7]);
+			$('#bottompoint').val(Sep);
 		}
 
-		if (prevlep != "") {
-			lep = Number(prevlep);
-		}
-		if (prevrep != "") {
-			rep = Number(prevrep);
-		}
-		hlocN = border+dx*N;
-		hlocS = border+dx*S;
+		hlocE = border+dx*E;
+		hlocW = border+dx*W;
+		vlocN = height - (tborder+dy*N);
+		vlocS = height - (tborder+dy*S);
  		redrawPic();
  	}
 })
 
 function sendit(){
+	var Eval = (E-10)*scale;
+	var Wval = (W-10)*scale;
 	var Nval = (N-10)*scale;
 	var Sval = (S-10)*scale;
-	var returnstring = qn + "::" + scale + "," + Sval + "," + Nval+ "," + lep + "," + rep;
+	var returnstring = qn + "::" + eqType + "," + eq + "," + scale + "," + xmin + "," + xmax + "," + fWep + "," + fEep;
+	returnstring += "," + Wval + ":" + Wep + ":" + Eval + ":" + Eep + ":" + Nval + ":" + Nep + ":" + Sval + ":" + Sep + ":";
 	parent.postMessage(returnstring,"*");
 }
 </script>
@@ -473,44 +656,38 @@ body {
 </head>
 <body>
 <div id="canvaswrapper" style="position:relative;">
-<canvas width="600" height="600" id="thecanvas" style="position:relative;">
+<canvas width="550" height="550" id="thecanvas" style="position:relative;">
 Your browser does not support Canvas. Please use a modern browser.
 </canvas>
-<div id="control1" style="position:absolute;left:50px;top:520px;text-align:center;">
-	Left End Point<br><select id="leftpoint" onchange="setLeftEndPoint(this)">
-			<option value=1><</option>
+<div id="label1" style="position:absolute;left:180px;top:460px;text-align:center;"><b>End Points</b></div>
+<div id="control1" style="position:absolute;left:20px;top:440px;text-align:center;">
+	Left<br><select id="leftpoint" onchange="setLeftEndPoint(this)">
+			<option value=1><--</option>
 			<option value=2  selected>(</option>
 			<option value=3>[</option>
 			<option value=4>None</option>
 	      </select>
 </div>
-<div id="control2" style="position:absolute;left:280px;top:520px;text-align:center;">	      
-	Scale<br> <select id="scale" onchange="setScale(this)">
-			<option value=1 selected>1</option>
-			<option value=2>2</option>
-			<option value=5>5</option>
-			<option value=10>10</option>
-	      </select>
-</div>	      
-<div id="control3" style="position:absolute;left:450px;top:520px;text-align:center;">
-	Right End Point<br> <select id="rightpoint" onchange="setRightEndPoint(this)">
-			<option value=1 >></option>
+      
+<div id="control3" style="position:absolute;left:100px;top:440px;text-align:center;">
+	Right<br> <select id="rightpoint" onchange="setRightEndPoint(this)">
+			<option value=1 >--></option>
 			<option value=2  selected>)</option>
 			<option value=3>]</option>
 			<option value=4>None</option>
 	      </select>
 </div>
-<div id="control4" style="position:absolute;left:550px;top:20px;text-align:center;">
-	Top End Point<br><select id="toppoint" onchange="setTopEndPoint(this)">
-			<option value=1>></option>
+<div id="control4" style="position:absolute;left:360px;top:440px;text-align:center;">
+	Top<br><select id="toppoint" onchange="setTopEndPoint(this)">
+			<option value=1>--></option>
 			<option value=2  selected>)</option>
 			<option value=3>]</option>
 			<option value=4>None</option>
 	      </select>
 </div>
-<div id="control5" style="position:absolute;left:550px;top:300px;text-align:center;">
-	Bottom End Point<br><select id="bottompoint" onchange="setBottomEndPoint(this)">
-			<option value=1><</option>
+<div id="control5" style="position:absolute;left:280px;top:440px;text-align:center;">
+	Bottom<br><select id="bottompoint" onchange="setBottomEndPoint(this)">
+			<option value=1><--</option>
 			<option value=2  selected>(</option>
 			<option value=3>[</option>
 			<option value=4>None</option>
