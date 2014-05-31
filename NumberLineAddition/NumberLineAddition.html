@@ -76,8 +76,8 @@ function redrawPic(isactive) {
 	ctx.strokeStyle = '#000000';
 	ctx.lineWidth = .25;
 	ctx.beginPath();
-	ctx.moveTo(0,toff-40);
-	ctx.lineTo(w,toff-40);
+	ctx.moveTo(0,toff-20);
+	ctx.lineTo(w,toff-20);
 	ctx.stroke();
 	ctx.beginPath();
 	if (hlocN >= w/2) {
@@ -86,23 +86,23 @@ function redrawPic(isactive) {
 		ctx.strokeStyle = red;
 	}
 	ctx.lineWidth = 3;
-	ctx.moveTo(w/2,toff-40);
-	ctx.lineTo(hlocN,toff-40);
+	ctx.moveTo(w/2,toff-20);
+	ctx.lineTo(hlocN,toff-20);
 	if (hlocN > w/2) {
-		ctx.moveTo(hlocN-10,toff-50);
-		ctx.lineTo(hlocN-1,toff-40);
-		ctx.lineTo(hlocN-10,toff-30);
+		ctx.moveTo(hlocN-10,toff-30);
+		ctx.lineTo(hlocN-1,toff-20);
+		ctx.lineTo(hlocN-10,toff-10);
 	} else if (hlocN < w/2) {
-		ctx.moveTo(hlocN+10,toff-50);
-		ctx.lineTo(hlocN+1,toff-40);
-		ctx.lineTo(hlocN+10,toff-30);
+		ctx.moveTo(hlocN+10,toff-30);
+		ctx.lineTo(hlocN+1,toff-20);
+		ctx.lineTo(hlocN+10,toff-10);
 	}
 	ctx.stroke();
 	ctx.beginPath();
 	ctx.lineWidth = 1;
 	ctx.strokeStyle = black;
 	ctx.fillStyle = 'rgba(0,0,0,0.5)';
-	ctx.arc(w/2,toff-40,3, 0, 2*Math.PI, false);
+	ctx.arc(w/2,toff-19,3, 0, 2*Math.PI, false);
 	ctx.fill();
 	ctx.beginPath();
 	ctx.lineWidth = 1;
@@ -111,7 +111,7 @@ function redrawPic(isactive) {
 	} else {
 		ctx.fillStyle = 'rgba(0,255,0,0.5)';
 	}
-	ctx.arc(hlocN,toff-40,7, 0, 2*Math.PI, false);
+	ctx.arc(hlocN,toff-20,7, 0, 2*Math.PI, false);
 	ctx.fill();
 	ctx.stroke();
 
@@ -121,8 +121,8 @@ function redrawPic(isactive) {
 	ctx.strokeStyle = '#000000';
 	ctx.lineWidth = .25;
 	ctx.beginPath();
-	ctx.moveTo(0,toff-20);
-	ctx.lineTo(w,toff-20);
+	ctx.moveTo(0,toff-40);
+	ctx.lineTo(w,toff-40);
 	ctx.stroke();
 	ctx.beginPath();
 	if (hlocS >= hlocN) {
@@ -131,23 +131,23 @@ function redrawPic(isactive) {
 		ctx.strokeStyle = red;
 	}
 	ctx.lineWidth = 3;
-	ctx.moveTo(hlocN,toff-20);
-	ctx.lineTo(hlocS,toff-20);
+	ctx.moveTo(hlocN,toff-40);
+	ctx.lineTo(hlocS,toff-40);
 	if (hlocS > hlocN) {
-		ctx.moveTo(hlocS-10,toff-30);
-		ctx.lineTo(hlocS-1,toff-20);
-		ctx.lineTo(hlocS-10,toff-10);
+		ctx.moveTo(hlocS-10,toff-50);
+		ctx.lineTo(hlocS-1,toff-40);
+		ctx.lineTo(hlocS-10,toff-30);
 	} else if (hlocS < hlocN) {
-		ctx.moveTo(hlocS+10,toff-30);
-		ctx.lineTo(hlocS+1,toff-20);
-		ctx.lineTo(hlocS+10,toff-10);
+		ctx.moveTo(hlocS+10,toff-50);
+		ctx.lineTo(hlocS+1,toff-40);
+		ctx.lineTo(hlocS+10,toff-30);
 	}
 	ctx.stroke();
 	ctx.beginPath();
 	ctx.lineWidth = 1;	
 	ctx.strokeStyle = black;
 	ctx.fillStyle = 'rgba(0,0,0,0.5)';
-	ctx.arc(hlocN,toff-20,3, 0, 2*Math.PI, false);
+	ctx.arc(hlocN,toff-40,3, 0, 2*Math.PI, false);
 	ctx.fill();
 	ctx.stroke();
 	ctx.beginPath();
@@ -157,7 +157,7 @@ function redrawPic(isactive) {
 	} else {
 		ctx.fillStyle = 'rgba(100,255,0,0.5)';
 	}
-	ctx.arc(hlocS,toff-20,7, 0, 2*Math.PI, false);
+	ctx.arc(hlocS,toff-40,7, 0, 2*Math.PI, false);
 	ctx.fill();
 	ctx.stroke();
 
@@ -173,6 +173,18 @@ function redrawPic(isactive) {
 //	ctx.strokeStyle = '#FF0000';
 	ctx.moveTo(w/2,10+toff);
 	ctx.lineTo(hlocS,10+toff);
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.lineWidth=2;
+	if (hlocS > w/2) {
+		ctx.moveTo(hlocS-10,toff+20);
+		ctx.lineTo(hlocS-1,toff+10);
+		ctx.lineTo(hlocS-10,toff);
+	} else if (hlocS < w/2) {
+		ctx.moveTo(hlocS+10,toff+20);
+		ctx.lineTo(hlocS+1,toff+10);
+		ctx.lineTo(hlocS+10,toff);
+	}
 	ctx.stroke();
 	sendit();
 }
@@ -292,13 +304,13 @@ function isInDragTargetN(e) {
 	var wpos = $("#thecanvas").offset();
 	var xpos = e.pageX - wpos.left;
 	var ypos = e.pageY - wpos.top;
-	return (distsqr(xpos,ypos,hlocN,toff-40)<(istouch?200:60));
+	return (distsqr(xpos,ypos,hlocN,toff-20)<(istouch?200:60));
 }
 function isInDragTargetS(e) {
 	var wpos = $("#thecanvas").offset();
 	var xpos = e.pageX - wpos.left;
 	var ypos = e.pageY - wpos.top;
-	return (distsqr(xpos,ypos,hlocS,toff-20)<(istouch?200:60));
+	return (distsqr(xpos,ypos,hlocS,toff-40)<(istouch?200:60));
 }
 function distsqr(x1,y1,x2,y2) {
 	return ((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
