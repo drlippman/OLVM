@@ -29,7 +29,7 @@
 
 
 global $allowedmacros;
-array_push($allowedmacros,"vmgetlistener","vmsetupchipmodel","vmchipmodelgetcount","vmsetupnumbertiles","vmnumbertilesgetcount","vmsetupitemsort","vmitemsortgetcontainers","vmsetupnumberlineaddition","vmnumberlineadditiongetvals","vmsetupnumberline","vmnumberlinegetvals","vmsetupnumberlineinterval","vmnumberlineintervalgetvals","vmsetupfractionline","vmgetfractionlinevals","vmsetupfractionmult","vmgetfractionmultvals");
+array_push($allowedmacros,"vmgetlistener","vmsetupchipmodel","vmchipmodelgetcount","vmsetupnumbertiles","vmnumbertilesgetcount","vmsetupitemsort","vmitemsortgetcontainers","vmsetupnumberlineaddition","vmnumberlineadditiongetvals","vmsetupnumberline","vmnumberlinegetvals","vmsetupnumberlineinterval","vmnumberlineintervalgetvals","vmsetupfractionline","vmgetfractionlinevals","vmsetupfractionmult","vmgetfractionmultvals","vmsetupfractioncompare","vmgetfractioncompareval");
 
 //vmgetlistener(qn,[part])
 //Generates a listener to receive values from virtual manipulatives.
@@ -250,6 +250,30 @@ function vmsetupfractionline($state="",$qn=null,$part=null) {
 //vmgetfractionlineval(stuans)
 //return array(numerator, denominator)
 function vmgetfractionlinevals($state) {
+	return explode(',',$state);
+}
+
+
+//vmsetupfractioncompare([stuans,qn,part])
+//Set up a fraction number line comparison manipulative, with two lines
+function vmsetupfractioncompare($state="",$qn=null,$part=null) {
+	if ($qn==null) {
+		$querystr = '';
+	} else {
+		if ($part !== null) {$qn = 1000*($qn)+$part;} else {$qn--;}
+		if ($state!="") {
+			list($Na,$Da,$Nb,$Db) = explode(',',$state);
+		} else{
+			$Na = 1;  $Da = 4; $Nb = 1;  $Db = 4;
+		}
+		$querystr = '?qn='.$qn.'&Na='.$Na.'&Da='.$Da.'&Nb='.$Nb.'&Db='.$Db;
+	}
+	return '<iframe src="https://s3-us-west-2.amazonaws.com/oervm/fractions/fraccompare.html'.$querystr.'" width="620" height="225" frameborder="0"></iframe>';	
+}
+
+//vmgetfractioncompareval(stuans)
+//return array(numerator, denominator)
+function vmgetfractioncompareval($state) {
 	return explode(',',$state);
 }
 

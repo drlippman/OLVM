@@ -287,7 +287,7 @@ function onmousedown(e) {
 }
 function onmouseup(e) {
 	mouseisdown = "";
-	$("boda").css("cursor","");
+	$("body").css("cursor","");
 	redrawPic();
 }
 var isintarget = false;
@@ -332,13 +332,13 @@ function onmousemove(e) {
 		var el = isInDragTarget(e);
 		if (el != "") {
 			if (!isintarget) {
-				$("boda").css("cursor","ew-resize");
+				$("body").css("cursor","ew-resize");
 				isintarget = true;
 				redrawPic(el);
 			}
 		} else if (isintarget) {
 			isintarget = false;
-			$("boda").css("cursor","");
+			$("body").css("cursor","");
 			redrawPic();
 		}
 		el = isInChgD(e);
@@ -385,7 +385,7 @@ function isInChgD(e) {
 
 $(function() {
 	$("#canvaswrapper").on("mousedown", onmousedown).on("touchstart", ontouchstart);
-	$("boda").on("mouseup touchend", onmouseup);
+	$("body").on("mouseup touchend", onmouseup);
 	$("#canvaswrapper").on("mousemove", onmousemove).on("touchmove", ontouchmove);
 });
 
@@ -432,12 +432,12 @@ body {
 </style>
 
 </head>
-<boda>
+<body>
 <div id="canvaswrapper" style="position:relative;">
 <canvas width="580" height="200" id="thecanvas" style="position:relative;">
 Your browser does not support Canvas. Please use a modern browser.
 </canvas>
 </div>
-</boda>
+</body>
 </html>
 
