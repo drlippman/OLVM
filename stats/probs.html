@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head><title>Normat/t-distribution Probabilities</title>
+<style type="text/css">
+html {
+	padding:0; margin:0;
+}
+body {
+	padding: 5px; margin:0;
+}
+h2 {
+	margin: 5px 0px;
+	padding: 0;
+}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="jstat.min.js"></script>
+<script type="text/javascript">
+function docalc() {
+	var test = $('input[name="dist"]:checked').val();
+	var df = $("#df").val()*1;
+	var mu = $("#mean").val()*1;
+	var sig = $("#stdev").val()*1;
+	var type = $('input[name="testtype"]:checked').val();
+	if (type=="left") {
+		var val = $("#xl").val()*1;
+		if (test=="z") {
+			var prob = jStat.normal.cdf(val, mu, sig);
+		} else {
+			var prob = jStat.studentt.cdf((val - mu)/sig, df*1);
+		}
+		prob = Math.round(1000000*prob)/1000000;
+		var out = "P(x&lt;"+val+") = "+'<span style="color:red;">'+prob+'</span>';
+		var leftval = mu-4.5*sig;
+		var rightval = val;
+	} else if (type=="right") {
+		var val = $("#xr").val()*1;
+		if (test=="z") {
+			var prob = 1-jStat.normal.cdf(val, mu, sig);
+		} else {
+			var prob = 1-jStat.studentt.cdf((val - mu)/sig, df);
+		}
+		prob = Math.round(1000000*prob)/1000000;
+		var out = "P(x&gt;"+val+") = "+'<span style="color:red;">'+prob+'</span>';
+		var leftval = val;
+		var rightval = mu+4.5*sig;
+	} else if (type=="bt") {
+		var val1 = $("#xbl").val()*1;
+		var val2 = $("#xbr").val()*1;
+		if (test=="z") {
+			var prob = jStat.normal.cdf(val2, mu, sig)-jStat.normal.cdf(val1, mu, sig);
+		} else {
+			var prob = jStat.studentt.cdf((val2 - mu)/sig, df)-jStat.studentt.cdf((val1 - mu)/sig, df);
+		}
+		prob = Math.round(1000000*prob)/1000000;
+		var out = "P("+val1+"&lt;x&lt;"+val2+") = "+'<span style="color:red;">'+prob+'</span>';
+		var leftval = val1;
+		var rightval = val2;
+	} else if (type=="probl") {
+		var val = $("#pl").val()*1;
+		if (test=="z") {
+			var prob = jStat.normal.inv(val, mu, sig);
+		} else {
+			var prob = mu + sig*jStat.studentt.inv(val, df);
+		}
+		prob = Math.round(1000000*prob)/1000000;
+		var out = "P(x&lt;"+'<span style="color:red;">'+prob+'</span>'+") = "+val;
+		var leftval = mu-4.5*sig;
+		var rightval = prob;
+	} else if (type=="probr") {
+		var val = $("#pr").val()*1;
+		if (test=="z") {
+			var prob = jStat.normal.inv(1-val, mu, sig);
+		} else {
+			var prob = mu + sig*jStat.studentt.inv(1-val, df);
+		}
+		prob = Math.round(1000000*prob)/1000000;
+		var out = "P(x&gt;"+'<span style="color:red;">'+prob+'</span>'+") = "+val;
+		var leftval = prob;
+		var rightval = mu+4.5*sig;
+	}
+	$("#out").html("<p>"+out+"</p>");
+	
+	drawcurve(leftval,rightval);
+		
+}
+function drawcurve(leftval,rightval) {
+	var mu = $("#mean").val()*1;
+	var sig = $("#stdev").val()*1;
+	var canvas = $("#thecanvas")[0];
+	var ctx = canvas.getContext('2d');
+	var w = canvas.width;
+	var h = canvas.height;
+	ctx.clearRect(0,0,w,h);
+	ctx.beginPath();
+	ctx.moveTo(0,h-25);
+	ctx.lineTo(w,h-25);
+	ctx.stroke();
+	ctx.textBaseline = "top";
+	ctx.textAlign = "center";
+	ctx.font = '16px sans-serif';
+	ctx.fillStyle = "rgb(0, 0, 0)";
+	var dx = w/9; var x;
+	
+	var y;  var gmu = w/2;  var gsig = w/9;
+	
+	if (leftval !== null) {
+		ctx.fillStyle = "rgba(0, 0, 200, 0.5)";
+		var xstart = w/2 + dx*(leftval-mu)/sig;
+		var xend = w/2 + dx*(rightval-mu)/sig;
+		ctx.beginPath();
+		ctx.moveTo(xstart,h-25);
+		for (i=xstart;i<=xend;i++) {
+			y = h - 25 - (h-27)*Math.exp(-.5*((i - gmu)/gsig)*((i - gmu)/gsig));
+			ctx.lineTo(i, y);
+		}
+		ctx.lineTo(i,h-25);
+		ctx.fill();
+	}
+	
+	ctx.beginPath();
+	ctx.moveTo(0,h-25);
+	for (i=0;i<=w;i++) {
+		y = h - 25 - (h-27)*Math.exp(-.5*((i - gmu)/gsig)*((i - gmu)/gsig));
+		ctx.lineTo(i, y);
+	}
+	ctx.stroke();
+	
+	ctx.fillStyle = "rgb(0, 0, 0)";
+	for (i=-4;i<5;i++) {
+		x = w/2 + i*dx;
+		ctx.beginPath();
+		ctx.moveTo(x,h-20);
+		ctx.lineTo(x,h-30);
+		ctx.stroke();
+		ctx.fillText(mu*1+i*sig, x, h-16);
+	}	
+	
+}
+$(function() {
+	drawcurve();
+});
+</script>
+</head>
+<body>
+
+<h2>Normat/t-distribution Probabilities</h2>
+
+<form id="normform">
+<p>
+Test Distribution: 	<input type="radio" name="dist" value="z" CHECKED>Normal Distribution
+			<input type="radio" name="dist" value="t">t-Distribution with <input type="text" size="3" id="df"/> degrees of freedom
+</p>
+<p>
+<table>
+<tr><td align=right>Mean:</td><td><input type="text" id="mean" value="0"/></td></tr>
+<tr><td align=right>Standard deviation:</td><td><input type="text" id="stdev" value="1"/></td></tr>
+</table>
+<p>
+Probability to calculate: <br>
+		<input type="radio" name="testtype" value="left" CHECKED>P(x&lt;<input size="3" type="text" id="xl"/>)<br>
+		<input type="radio" name="testtype" value="right">P(x&gt;<input size="3" type="text" id="xr"/>)<br>
+		<input type="radio" name="testtype" value="bt">P(<input size="3" type="text" id="xbl"/>&lt;x&lt;<input size="3" type="text" id="xbr"/>)<br>
+		<input type="radio" name="testtype" value="probl">P(x&lt;??)=<input size="3" type="text" id="pl"/><br>
+		<input type="radio" name="testtype" value="probr">P(x&gt;??)=<input size="3" type="text" id="pr"/>
+</p>
+
+<input type="button" value="Calculate" onclick="docalc()" />
+<div id="out"></div>
+</form>
+<canvas width="600" height="200" id="thecanvas"></canvas>
+<p style="font-size:70%">
+<i>Note:  This creates the graph based on the shape of the normal curve, which is a reasonable
+approximation to the t-distribution for a large sample size.  The probabilities are accurate, but
+the graphs are not accurate if you are doing a t-distribution with small sample size (less than 30).</i></p>
+
+</body>
+</html>
