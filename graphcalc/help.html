@@ -1,0 +1,264 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" type="text/javascript"></script>
+   <title>Graphing Calculator Help</title>
+   <style type="text/css">
+   #tablist {
+   	   width: 200px;
+   	   float: left;
+   }
+   	   
+    ul.tabs {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	width: 200px;
+	border: 1px solid #ccc;
+}
+ul.tabs li {
+	line-height: 30px;
+	height: 30px;
+	background: #eeeeee;
+	border-bottom: 1px solid #ccc;
+}
+html ul.tabs li.active, html ul.tabs li.active a:hover  { 
+	background: #fff;
+}
+ul.tabs li a {
+	text-decoration: none;
+	padding: 0 20px;
+	color: #000;;
+	display: block;
+	width: 200px;
+	
+}
+ul.tabs li a:hover {
+	background: #ccc;
+}
+
+#bigtabcontainer {
+	width: 740px;
+	margin: auto;
+}
+.tab_container {
+	border: 1px solid #999;
+	overflow: auto;
+	float: left; 
+	width: 500px;
+	height: 400px;
+	background: #fff;
+	padding: 5px 15px;
+	
+}
+.tab_content {
+	margin: 0;
+}
+
+.tab_content div {
+	margin-bottom: 10px;
+}
+
+.tab_content ul {
+	margin-top: 0px;
+}
+.tab_content ul li {
+	margin: 5px 0;
+}
+</style>
+<script type="text/javascript">
+//tabs 
+//from http://www.sohtanaka.com/web-design/simple-tabs-w-css-jquery/
+$(document).ready(function() {
+
+	//When page loads...
+	$(".tab_content").hide(); //Hide all content
+	$("ul.tabs li:first").addClass("active").show(); //Activate first tab
+	$(".tab_content:first").show(); //Show first tab content
+
+	//On Click Event
+	$("ul.tabs li").click(function() {
+
+		$("ul.tabs li").removeClass("active"); //Remove any "active" class
+		$(this).addClass("active"); //Add "active" class to selected tab
+		$(".tab_content").hide(); //Hide all tab content
+
+		var activeTab = $(this).find("a").attr("href"); //Find the href attribute value to identify the active tab + content
+		$(activeTab).fadeIn(); //Fade in the active ID content
+		return false;
+	});
+
+});
+
+</script>
+</head>
+<body>
+<div id="bigtabcontainer">
+<h2>Graphing Calculator Help</h2>
+	<div id="tablist">
+	<ul class="tabs">
+	  <li><a href="#tabs-1">Graphing Functions</a></li>
+	  <li><a href="#tabs-2">Setting Window</a></li>
+	  <li><a href="#tabs-3">Calculating on Graphs</a></li>
+	  <li><a href="#tabs-4">Tables</a></li>
+	  <li><a href="#tabs-5">Using the Calculator</a></li>
+	  <li><a href="#tabs-6">Function Reference</a></li>
+	</ul>
+	</div>
+	<div class="tab_container">
+		<div id="tabs-1" class="tab_content">
+			<p>To graph functions, click on the <b>Eqn</b> tab.</p>
+			<p>From the <b>Mode</b> pulldown, select the type of function you wish to graph.</p>
+			
+			<p>For <b>f(x)</b> function graphs, enter the functions
+			you wish to graph, using <i>x</i> as the input variable.</p>
+			
+			<p>For <b>r(t)</b> polar graphs, enter your equations, using <i>t</i> as the input variable,
+			in place of &theta;.</p>
+			
+			<p>For <b>x(t),y(t)</b> parametric graphs, enter your equations in pairs, using <i>t</i> as the input variable.</p>
+			
+			<p>Once you have entered the functions, click the <b>Plot Graphs</b> button
+			to plot the graphs and register the equations.  You can now use these 
+			functions in the calculator, or generate a table of values for these functions</p>
+			
+			<p>You can change the color of a graph by clicking the color box <img src="images/trigger.png"/> to the right of
+			the function.  Once you have selected the color you want, click  <b>Plot Graphs</b>
+			again to update the graph</p>
+		</div>
+		<div id="tabs-2" class="tab_content">
+			<p>To adjust the viewing window of the graph, you have several options:
+			<ul>
+			<li>Click on the <b>Window</b> tab, and manually change the minimum and maximum
+			x and y values, and for polar or parametric graphs, the minimum and maximum t values.
+			Click <b>Update</b> after changing the values to update the 
+			graph, or <b>Reset</b> to reset the values back to the default.</li>
+			<li>Hold down the <b>Shift</b> key as you click and drag the graph.  This will 
+			allow you to pan (shift) the graphing window.</li>
+			<li>Use your mouse wheel to zoom in and out while hovering the mouse pointer over 
+			the graph</li>
+			<li>Use the navigation bar <img src="images/nav.png"/> in the lower right corner of the
+			graph to change the view.  The
+			+ and - buttons zoom in and out, the o button resets the zoom, and the arrow buttons
+			will pan (shift) the graphing window.</li>
+			</ul>
+		</div>
+		<div id="tabs-3" class="tab_content">
+			<p>To calculate roots, maximums, minimums, and intersections, click on the <b>Calc</b> tab
+			and select the item you want to calculate from the list.  Note that this tab will only be available
+			for f(x) function graphs.</p>
+			
+			<h4>Trace</h4>
+			<p>Trace allows you to move a point along a curve.  After selecting this option, click
+			on the graph you want to trace.  This will place a point on the graph which you can then
+			drag along the graph.  The approximate coordinates of the trace point will show next to the
+			point.</p>
+			
+			<h4>Root / Zero</h4>
+			<p>Root / Zero will find the location where a graph crosses the horizontal axis.  If there are
+			more than one graphs currently plotted, you will be asked to select which graph you want to 
+			find the root of; do so by clicking on the graph.  Next, you will be asked to draw a box
+			around the root.  Click and drag on the graph to draw a box that encloses the root.  The
+			approximate coordinates of the root will be displayed.</p>
+			
+			<h4>Max and Min</h4>
+			<p>Max and Min will find the location of a local maximum or minimum.  If there are
+			more than one graphs currently plotted, you will be asked to select which graph you want to 
+			find the max/min of; do so by clicking on the graph.  Next, you will be asked to draw a box
+			around the max/min.  Click and drag on the graph to draw a box that encloses the max/min.  The
+			approximate coordinates of the max/min will be displayed.</p>
+			
+			<h4>Intersection</h4>
+			<p>Intersection will find the location where two graphs cross.  If there are
+			more than two graphs currently plotted, you will be asked to select which graphs you want to 
+			find the intersection of; do so by clicking the two graphs.  Next, you will be asked to draw a box
+			around the intersection.  Click and drag on the graph to draw a box that encloses the intersection.  The
+			approximate coordinates of the intersection will be displayed.</p>
+			
+			<h4>Derivative</h4>
+			<p>Derivative will approximate the slope of the tangent line to a curve at a point.  You will
+			be asked to select which graph you want to work with; do so by clicking on the graph.  You will be prompted
+			for the x-value where you want to calculate the derivative.  Enter it and hit <b>Calculate</b>.  The approximate
+			derivative will display.</p>
+			
+			<h4>Integral</h4>
+			<p>Integral will approximate the area under a curve over an interval.  You will
+			be asked to select which graph you want to work with; do so by clicking on the graph.  You will be prompted
+			for the starting and ending x-valuex for the interval over which you want to find the integral.  Enter these
+			values and and hit <b>calculate</b>.  The approximate integral will display.</p>
+		</div>
+		<div id="tabs-4" class="tab_content">	
+			<p>To generate a table of values for the graphed functions, click on the <b>Table</b> tab.  You have two
+			options for the <i>x</i>-values:  <b>Ask</b> or <b>Auto</b></p>
+			
+			<p>If you select <b>Ask</b> and click <b>Go</b>, a table will be generated with empty input boxes for the <i>x</i>
+			values.  You can manually enter the <i>x</i>-values you want to evaluate the functions at, and when you click or tab to
+			the next box, the output values will automatically be calculated.</p>
+			
+			<p>If you select <b>Auto</b>, then enter a starting <i>x</i> value and the step size - how far apart each 
+			consecutive <i>x</i> value should be.  For example, if you select a start of 3 and a step of 2, then the 
+			table will be generated for <i>x</i> = 3, 5, 7, 9, etc.  Click <b>Go</b> to generate the table.</p>
+		</div>
+		<div id="tabs-5" class="tab_content">	
+			<p>In the lower left side of the screen you will find a box with a blue stripe.  This is the output log.  In 
+			addition to recording any calculated roots, max/mins, etc., you can also do calculations.  In the entry box
+			below the output log, type any numerical expression and click <b>Enter</b> or press Enter of your keyboard.  The
+			result of the calculation will display in the output log.</p>
+			
+			<p>If you have graphed functions, you can evaluate the functions in the calculator.  For example, 
+			entering <b>f(3)</b> will evaluate the graphed f(x) function at x=3.</p>
+			
+			<p>If you want to edit a previous calculation, click the line number to the left of the expression to copy that
+			expression back into the input box.  Alternatively, you can use the up and down arrow keys to
+			navigate through previous input expressions.</p>
+			
+			<p>If you want to use the results of previous calculations in your next calculation, you can do that:
+			<ul>
+				<li><b>##</b> or <b>ANS</b> will use the result of the last calculation</li>
+				<li><b>#linenumber</b>, like <b>#2</b>, will use the result from that line</li>
+				<li><b>#2x</b> or <b>#2y</b> will allow you to access the x or y coordinate, respectively, from
+				a previous calculation on a graph that produced a point.</li>
+			</ul>
+			</p>
+		</div>
+		<div id="tabs-6" class="tab_content">
+			<p>These functions and constants can be used in graph equations or in the calculator
+			<ul>
+				<li><b>pi</b>:  The mathematical constant pi</li>
+				<li><b>e</b>:  The mathematical constant e</li>
+				<li><b>3^2</b>:  Exponent 3<sup>2</sup></li>
+				<li><b>sqrt(5)</b>:  Square root</li>
+				<li><b>root(3)(5)</b>:  Cube root</li>
+				<li><b>abs(4)</b>: Absolute value</li>
+				<li><b>sin, cos, tan, sec, csc, cot</b>:  The trig functions.  The calculator always operates in radian mode</li>
+				<li><b>arcsin, arccos, arctan, arcsec, arccsc, arccot</b>:  The inverse trig functions</li>
+				<li><b>log(3)</b>:  The common log (base 10)</li>
+				<li><b>ln(3)</b>:  The natural log (base e) </li>
+			</ul>
+			</p>
+			<p>Statistical functions:</p>
+			<ul>
+				<li><b>4!</b>:  Factorial</li>
+				<li><b>nCr(n,r)</b> and <b>nPr(n,r)</b> Combinations and permutations of n objects taken r at a time.</li>
+				<li><b>normalcdf(a,b,[mean,stdev])</b> Calculates the normal distribution probability 
+				   P(a&lt;x&lt;b).  Can optionally specify the mean and standard deviation, otherwise a 
+				   standard normal distribution is used (mean=0, stdev=1).</li>
+				<li><b>invnorm(p,[mean,stdev])</b>  Finds the z score of the standard normal distribution 
+				   so that the area to the left of this z score equals p.  Can optionally specify the mean 
+				   and standard deviation to find the x score so that the area to the left of this x score equals p. 
+				</li>
+				<li><b>tcdf(a,b,df)</b>  Calculated the Student's t distribution probability P(a&lt;x&lt;b)
+				  with df degrees of freedom.</li>
+				<li><b>invT(p,df)</b>  Finds the t score so that the area to the left of this t score equals p.</li>
+				<li><b>binompdf(n,p,r)</b>  Finds the binomial probability P(X=r), the probability
+				  of r successes out of n trials, where each independent trial has probability of success of p.</li>
+				<li><b>binomcdf(n,p,r)</b>  Like the binompdf, but finds the probability P(X&le;r), the 
+				  probably of at most r successes.</li>
+			</ul>
+				
+		</div>
+	</div>
+</div>
+</body>
+</html>
+

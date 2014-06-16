@@ -1,0 +1,172 @@
+h2 {
+   	   margin: 10px 0px 15px;
+   }
+   div#log {
+   	   border: 1px solid #999;
+   	   height: 200px;
+   	   overflow: auto;
+   	   background:#fff url(images/stripe.png) 0 0 repeat-y; 
+   	   overflow-y: scroll;
+
+   }
+   div.in {
+	 position: relative;
+	 margin-left: 37px;
+   }
+   div.innum {
+	 position: absolute;
+	 left: 0px;
+	 width: 25px;
+	 text-align: right;
+	 color: #fff;
+   }
+   div.out {
+	 text-align: right;
+	 color: #060;
+   }
+   div.entry {
+	 position: relative;
+	 border-bottom: 1px solid #cccccc;
+	 padding: 4px 7px 5px 0px;
+   }
+   .funcinput {
+   	   width: 215px;
+   }
+   div#console {
+   	    height: 1.5em;
+   	    border: 1px solid #000;
+   	    padding: 5px;
+   }
+   div#log p {
+   	   margin: 2px;
+   }
+   div#bigcontainer {
+   	   width: 950px;
+   	   margin: auto;
+   	   position: relative;
+   }
+   div#left {
+   	   width: 450px;
+   	   position: absolute;
+   }
+   div#right {
+   	   position: absolute;
+   	   left: 460px;
+   	   width: 520px;
+   }
+   ul.tabs {
+	margin: 0;
+	padding: 0;
+	float: left;
+	list-style: none;
+	height: 32px;
+	border-bottom: 1px solid #999;
+	border-left: 1px solid #999;
+	width: 100%;
+}
+ul.tabs li {
+	float: left;
+	margin: 0;
+	padding: 0;
+	height: 31px; 
+	line-height: 31px; 
+	border: 1px solid #999;
+	border-left: none;
+	margin-bottom: -1px; 
+	overflow: hidden;
+	position: relative;
+	background: #e0e0e0;
+}
+ul.tabs li a {
+	text-decoration: none;
+	color: #000;
+	display: block;
+	padding: 0 15px;
+	border: 1px solid #fff; 	
+	outline: none;
+}
+ul.tabs li a:hover {
+	background: #ccc;
+}
+html ul.tabs li.active, html ul.tabs li.active a:hover  { 
+	background: #fff;
+	border-bottom: 1px solid #fff; 
+}
+#bigtabcontainer {
+	height: 295px;
+}
+.tab_container {
+	border: 1px solid #999;
+	overflow: auto;
+	border-top: none;
+	clear: both;
+	float: left; 
+	width: 100%;
+	background: #fff;
+	height: 255px;
+	-moz-border-radius-bottomright: 5px;
+	-khtml-border-radius-bottomright: 5px;
+	-webkit-border-bottom-right-radius: 5px;
+	-moz-border-radius-bottomleft: 5px;
+	-khtml-border-radius-bottomleft: 5px;
+	-webkit-border-bottom-left-radius: 5px;
+}
+.tab_content {
+	padding: 15px 20px 0px;
+}
+
+.tab_content div {
+	
+}
+
+.tab_content ul {
+	margin-top: 0px;
+}
+.tab_content ul li {
+	margin: 5px 0;
+}
+#theFuncTable {
+	border-collapse: collapse;
+	width: 100%;
+}
+#theFuncTable td {
+	border: 1px solid #000;
+	padding: 2px 4px;
+}
+
+#calcinput {
+	color: #999999;
+	border: 1px solid #999;
+	padding: 3px;
+	margin-left: 30px;
+}
+#calcinput {
+	width: 320px;
+}
+a {
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
+}
+div#aboutwrapper {
+	z-index: 90;
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: #000;
+}
+div#about {
+	position: absolute;
+	top: 50px;
+	height: 300px;
+	background-color: #fff;
+	width: 500px;
+	left: 250px;
+	margin: auto;
+	border: 1px solid #ccc;
+	z-index: 99;
+	padding: 10px;
+}

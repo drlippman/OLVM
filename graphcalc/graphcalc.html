@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+   
+   <title>Graphing Calculator</title>
+   <link rel="stylesheet" type="text/css" href="jsxgraph.css" />
+    <link rel="stylesheet" type="text/css" href="miniColors.css" />
+     <link rel="stylesheet" type="text/css" href="graphcalc.css" />
+   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" type="text/javascript"></script>
+   <script type="text/javascript" src="jsxgraphcore-0.96.js"></script>
+   <script type="text/javascript" src="graphcalc.js?v=121112"></script>
+   <script type="text/javascript" src="mathjs.js?v=082911"></script>
+   
+   <script type="text/javascript" src="ASCIIMathMLwFallback.js"></script>
+   <script type="text/javascript" src="miniColors.js"></script>
+
+</head>
+<body>
+<div id="canvasbox" class="jxgbox" style="position:absolute;width:500px;height:500px;left:-600px"></div>
+
+<div id="bigcontainer">
+<div id="aboutwrapper" style="display:none"></div>
+<div id="about" style="display:none"><b>About</b>
+<p>This graphing calculator provides functionality similar to handheld graphing calculators
+like the TI-83/TI-84 in a convenient web-based format.
+
+<ul>
+<li>Graph f(x)= functions, polar curves, and parametric equations</li>
+<li>Find roots/zeros, max/mins, and intersections of f(x)= functions</li>
+<li>Create tables of values</li>
+<li>Do calculations, with textbook-style display of expressions</li>
+</ul>
+</p>
+<p>See the <a href="help.html">Help</a> for details on using the graphing calculator</p>
+<p>This graphing calculator was written by <a href="http://dlippman.imathas.com">David Lippman</a>
+   of <a href="http://www.myopenmath.com">MyOpenMath.com</a>.  It utilizes the 
+   <a href="http://jsxgraph.uni-bayreuth.de/wp/">JSXGraph</a> library for graphing and 
+   <a href="http://dlippman.imathas.com/asciimathtex/AMT.html">ASCIIMathML</a> for 
+   math display.  Inspiration was taken from <a href="http://www.bcalc.net">bcalc.net</a>.
+</p>
+</div>
+<div style="float:right"><a href="#" onclick="gbfadein();return false;">About</a> | <a href="help.html" target="calchelp">Help</a></div>
+<h2>Graphing Calculator</h2>
+<form id="myform">
+<div id="right">
+	<div id="jxgbox" class="jxgbox" style="width:500px; height:500px;"></div>
+	<div id="getasimg" style="display:none;text-align:right;width:500px;">
+	<a href="#" onclick="snapshot();return false;">Get as Image</a></div>
+</div>
+<div id="left">
+	<div id="bigtabcontainer">
+	<ul class="tabs">
+	  <li><a href="#tabs-1">Eqn</a></li>
+	  <li><a href="#tabs-2">Window</a></li>
+	  <li id="calctab"><a href="#tabs-3">Calc</a></li>
+	  <li id="tabletab"><a href="#tabs-4">Table</a></li>
+	</ul>
+	<div class="tab_container">
+		<div id="tabs-1" class="tab_content">
+			Mode:  <select id="graphmode" onchange="changegraphmode()">
+				<option selected="selected" value="y">f(x) Function Graph</option>
+				<option value="r">r(t) Polar Graph</option>
+				<option value="xy">x(y), y(t)  Parametric Graphs</option>
+				</select><br/>
+			<span id="fname0" style="color:#0000ff;">f(x)</span> = <input class="funcinput" type="text" size="30" value="x^2" id="func0" /><input type="hidden" id="color0" value="#0000ff"/> <br/>
+			<span id="fname1" style="color:#00cc00;">g(x)</span> = <input class="funcinput" type="text" size="30" value="3sin(x)" id="func1" /><input type="hidden" id="color1" value="#00cc00"/> <br/>
+			<span id="fname2"  style="color:#cc00cc;">h(x)</span> = <input class="funcinput" type="text" size="30" value="" id="func2" /><input type="hidden" id="color2" value="#cc00cc"/> <br/>
+			<input style="float:right;" type="button" value="Plot Graphs" onclick="plotgraph()"/>
+			
+			<span id="fname3" style="color:#00cccc;">k(x)</span> = <input class="funcinput" type="text" size="30" value="" id="func3" /><input type="hidden" id="color3" value="#00cccc"/> 
+			<hr/><div id="prettyeqns"></div>
+		</div>
+		
+		<div id="tabs-2" class="tab_content">
+			
+			x-min: <input type="text" size="5" value="-5" id="xmin" /> <br/>
+			x-max: <input type="text" size="5" value="5" id="xmax" /> <br/>
+			y-min: <input type="text" size="5" value="-5" id="ymin" /> <br/>
+			y-max: <input type="text" size="5" value="5" id="ymax" /> <br/>
+			<div id="polardomain" style="display:none;">
+			t-min: <input type="text" size="5" value="0" id="thmin" /> <br/>
+			t-max: <input type="text" size="5" value="6.28" id="thmax" />
+			</div>
+			<div id="paramdomain" style="display:none;">
+			t-min: <input type="text" size="5" value="-5" id="tmin" /> <br/>
+			t-max: <input type="text" size="5" value="5" id="tmax" />
+			</div>
+			<input type="button" value="Update" onclick="setWindow()" />
+			<input type="button" value="Reset" onclick="defaultWindow()" />
+		</div>
+		<div id="tabs-3" class="tab_content">
+			Mode: <select id="actmode" onchange="startmode()">
+			<option value="none" selected="selected">Select...</option>
+			<option value="trace">Trace</option>
+			<option value="root">Root / Zero</option>
+			<option value="max">Max</option>
+			<option value="min">Min</option>
+			<option value="intersection">Intersection</option>
+			<option value="derivative">Derivative</option>
+			<option value="integral">Integral</option>
+			</select>
+			<div id="calcinputs"></div>
+			<div id="console"></div>
+		</div>
+		<div id="tabs-4" class="tab_content">
+			<div id="tablemode">
+				<span id="tblinput">x</span>-values: <input type="radio" name="tabletype" value="ask"> Ask 
+				 <input type="radio" name="tabletype" value="auto" checked="checked"> Auto:
+				 start: <input type="text" id="tblxstart" value="0" size="2">
+				 step: <input type="text" id="tbldx" value="1" size="4">
+				 <input type="button" value="Go" onclick="prepTable()" />
+			</div>
+			<div id="tablecont" style="display:none;">
+			</div>
+		</div>
+	</div>
+	</div>
+	
+	<div id="log"></div>
+	<div id="calcinputholder">
+	<input id="calcinput" value="Type an expression, like 3*4^2" onfocus="calcinputonfocus()" onblur="calcinputonblur()" onkeydown="calcinputonkeydown(event,this)" onkeyup="calcinputonkeyup(event,this)"/> 
+	<input type="button" value="Enter" onclick="docalcinput()" />
+	</div>
+</div>
+</form>
+<form id="imagegetform" style="height:0px;" method="post" action="getimg.php">
+<input type="hidden" name="imgdata" id="imgdata"/>
+</form>
+</div>
+</body>
+</html>
