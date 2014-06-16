@@ -15,7 +15,7 @@ function updatePY() {
     document.getElementById('PY').value = document.getElementById('CY').value;
 }
 $(document).ready(function () {
-     $(".numberinput").forceNumeric();
+     //$(".numberinput").forceNumeric();
  });
 /*$(document).ready( function() {
     if (!isMobile()) {
@@ -25,6 +25,16 @@ $(document).ready(function () {
     }
 });
 */
+
+function parseEval(str) {
+	try {
+		with (Math) var res = eval(mathjs(str));
+		return res;
+	} catch(e) {
+		return NaN;
+	}	
+}
+
 // forceNumeric() plug-in implementation
 jQuery.fn.forceNumeric = function () {
 
@@ -55,25 +65,25 @@ jQuery.fn.forceNumeric = function () {
 function validateInput() {
     var results = false;
     document.getElementById('Status').value = "";
-    if (isNaN(document.getElementById('N').value)) {
+    if (isNaN(parseEval(document.getElementById('N').value))) {
         document.getElementById('Status').value = "N: is not a valid entry.";
         document.getElementById('N').focus();
-    }else if (isNaN(document.getElementById('I').value)) {
+    }else if (isNaN(parseEval(document.getElementById('I').value))) {
         document.getElementById('Status').value = "I: is not a valid entry.";
         document.getElementById('I').focus();
-    }else if (isNaN(document.getElementById('PV').value)) {
+    }else if (isNaN(parseEval(document.getElementById('PV').value))) {
         document.getElementById('Status').value = "PV: is not a valid entry.";
         document.getElementById('PV').focus();
-    } else if (isNaN(document.getElementById('PMT').value)) {
+    } else if (isNaN(parseEval(document.getElementById('PMT').value))) {
         document.getElementById('Status').value = "PMT: is not a valid entry.";
         document.getElementById('PMT').focus();
-    }else if (isNaN(document.getElementById('FV').value)) {
+    }else if (isNaN(parseEval(document.getElementById('FV').value))) {
         document.getElementById('Status').value = "FV: is not a valid entry.";
         document.getElementById('FV').focus();
-    }else if (isNaN(document.getElementById('PY').value)) {
+    }else if (isNaN(parseEval(document.getElementById('PY').value))) {
         document.getElementById('Status').value = "PY: is not a valid entry.";
         document.getElementById('PY').focus();
-    }else if (isNaN(document.getElementById('CY').value)) {
+    }else if (isNaN(parseEval(document.getElementById('CY').value))) {
         document.getElementById('Status').value = "CY: is not a valid entry.";
         document.getElementById('CY').focus();
     } else {
@@ -85,11 +95,11 @@ function validateInput() {
 function FV() {
     var bigN, littleN, principal, interest, payment,rate,accruedVal,x;
     if (validateInput()) {
-        bigN = parseFloat(document.getElementById('N').value);
-        littleN = parseFloat(document.getElementById('PY').value);
-        principal = parseFloat(document.getElementById('PV').value);
-        interest = parseFloat(document.getElementById('I').value);
-        payment = parseFloat(document.getElementById('PMT').value);
+        bigN = parseEval(document.getElementById('N').value);
+        littleN = parseEval(document.getElementById('PY').value);
+        principal = parseEval(document.getElementById('PV').value);
+        interest = parseEval(document.getElementById('I').value);
+        payment = parseEval(document.getElementById('PMT').value);
         rate = eval((interest)/(littleN * 100));
         if ( rate === 0 ) // Interest rate is 0
         {
@@ -105,12 +115,12 @@ function FV() {
 function PV() {
     var bigN, littleN, principal, interest, payment,rate,accruedVal,x,y;
     if (validateInput()) {
-        bigN = parseFloat(document.getElementById('N').value);
-        littleN = parseFloat(document.getElementById('PY').value);
-        principal = parseFloat(document.getElementById('PV').value);
-        interest = parseFloat(document.getElementById('I').value);
-        payment = parseFloat(document.getElementById('PMT').value);
-        accruedVal = parseFloat(document.getElementById('FV').value);
+        bigN = parseEval(document.getElementById('N').value);
+        littleN = parseEval(document.getElementById('PY').value);
+        principal = parseEval(document.getElementById('PV').value);
+        interest = parseEval(document.getElementById('I').value);
+        payment = parseEval(document.getElementById('PMT').value);
+        accruedVal = parseEval(document.getElementById('FV').value);
         rate = eval((interest)/(littleN * 100));
         if ( rate === 0 ) // Interest rate is 0
         {
@@ -127,12 +137,12 @@ function PV() {
 function PMT() {
     var bigN, littleN, principal, interest, payment,rate,accruedVal,x;
     if (validateInput()) {
-        bigN = parseFloat(document.getElementById('N').value);
-        littleN = parseFloat(document.getElementById('PY').value);
-        principal = parseFloat(document.getElementById('PV').value);
-        interest = parseFloat(document.getElementById('I').value);
-        payment = parseFloat(document.getElementById('PMT').value);
-        accruedVal = parseFloat(document.getElementById('FV').value);
+        bigN = parseEval(document.getElementById('N').value);
+        littleN = parseEval(document.getElementById('PY').value);
+        principal = parseEval(document.getElementById('PV').value);
+        interest = parseEval(document.getElementById('I').value);
+        payment = parseEval(document.getElementById('PMT').value);
+        accruedVal = parseEval(document.getElementById('FV').value);
         rate = eval((interest)/(littleN * 100));
         if ( rate === 0 ) // Interest rate is 0
         {
@@ -148,12 +158,12 @@ function PMT() {
 function bigN() {
     var bigN, littleN, principal, interest, payment,rate,accruedVal,x;
     if (validateInput()) {
-        bigN = parseFloat(document.getElementById('N').value);
-        littleN = parseFloat(document.getElementById('PY').value);
-        principal = parseFloat(document.getElementById('PV').value);
-        interest = parseFloat(document.getElementById('I').value);
-        payment = parseFloat(document.getElementById('PMT').value);
-        accruedVal = parseFloat(document.getElementById('FV').value);
+        bigN = parseEval(document.getElementById('N').value);
+        littleN = parseEval(document.getElementById('PY').value);
+        principal = parseEval(document.getElementById('PV').value);
+        interest = parseEval(document.getElementById('I').value);
+        payment = parseEval(document.getElementById('PMT').value);
+        accruedVal = parseEval(document.getElementById('FV').value);
         rate = eval((interest)/(littleN * 100));
         if ( rate === 0 ) // Interest rate is 0
         {
@@ -171,12 +181,12 @@ function interest() {
     var bigN, littleN, principal, interest, payment,rate,
             accruedVal,totalPaid,interestPaid,years,addon,lo_i,hi_i;
     if (validateInput()) {
-        bigN = parseFloat(document.getElementById('N').value);
-        littleN = parseFloat(document.getElementById('PY').value);
-        principal = parseFloat(document.getElementById('PV').value);
-        interest = parseFloat(document.getElementById('I').value);
-        payment = parseFloat(document.getElementById('PMT').value);
-        accruedVal = parseFloat(document.getElementById('FV').value);
+        bigN = parseEval(document.getElementById('N').value);
+        littleN = parseEval(document.getElementById('PY').value);
+        principal = parseEval(document.getElementById('PV').value);
+        interest = parseEval(document.getElementById('I').value);
+        payment = parseEval(document.getElementById('PMT').value);
+        accruedVal = parseEval(document.getElementById('FV').value);
         interest = calcNR(payment, principal, accruedVal, bigN, littleN);
         interest = Math.round(interest*100)/100;
         document.getElementById('I').value = interest;
