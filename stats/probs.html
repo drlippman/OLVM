@@ -133,9 +133,12 @@ function drawcurve(leftval,rightval) {
 		ctx.moveTo(x,h-20);
 		ctx.lineTo(x,h-30);
 		ctx.stroke();
-		ctx.fillText(mu*1+i*sig, x, h-16);
+		ctx.fillText(roundtext(mu*1+i*sig), x, h-16);
 	}	
 	
+}
+function roundtext(v) {
+	return Math.round(v*1e8)/1e8;
 }
 $(function() {
 	drawcurve();
