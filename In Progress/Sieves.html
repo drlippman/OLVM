@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Sieve</title>
+
+	<script src="../lib/easeljs-NEXT.combined.js"></script>
+	<script type="text/javascript" src="../lib/tweenjs-NEXT.combined.js"></script>
+
+<script id="editable">
+	var canvas, stage, container;
+	var tiles = [];
+	var selectingTiles = 0;
+	var RADIUS = 40;
+	var tileCount = 0;
+	var multiples = [];
+
+
+    
+	function init() {
+		qn = getParameterByName("qn");
+		initValue = getParameterByName("inVal");
+		if (initValue != null) {
+				in100 = Math.floor(initValue/100);
+				in10 = Math.floor(initValue%100/10);
+				in1 = initValue%10;
+		}
+		// create stage and point it to the canvas:
+		canvas = document.getElementById("testCanvas");
+		stage = new createjs.Stage(canvas);
+
+		// enable touch interactions if supported on the current device:
+		createjs.Touch.enable(stage);
+
+
+		// enabled mouse over / out events
+		stage.enableMouseOver(10);
+		stage.mouseMoveOutside = true; // keep tracking the mouse even when it leaves the canvas
+
+
+ 		addStageElements();
+		createjs.Ticker.setFPS(50);
+		createjs.Ticker.addEventListener("tick", stage);
+//		resize();
+	}
+
+	function addStageElements() {
+	    container = new createjs.Container();
+		stage.addChild(container);
+
+		createStage();
+		var tileXloc = 40;
+		var tileYloc = 24*40;
+		for (var i = 0; i < 144; i++) {
+			stage.addChild(createTile(tileXloc,tileYloc,i+2));
+			tileXloc+= 40;
+			if (tileXloc == 280)
+				tileXloc = 40;
+			if (tileXloc == 40)
+				tileYloc -= 40;
+		}
+		stage.addChild(createBeanBag(300,900,"#FF0000",2));
+		stage.addChild(createBeanBag(300,860,"#00FF00",3));
+		stage.addChild(createBeanBag(300,820,"#0000FF",4));
+		stage.addChild(createBeanBag(300,780,"#8800FF",5));
+		stage.addChild(createBeanBag(300,740,"#444444",6));
+		stage.addChild(createBeanBag(300,700,"#FF8800",7));
+		stage.addChild(createBeanBag(300,660,"#FFFF00",8));
+		stage.addChild(createBeanBag(300,620,"#AAAAAA",9));
+	}
+	function resetAll() {
+		stage.clear();
+		stage.removeAllChildren();
+		multiples.length = 0;
+		tileCount = 0;
+		tiles.length = 0;
+		addStageElements();
+		stage.update();
+	}
+
+	function stop() {
+		createjs.Ticker.removeEventListener("tick", tick);
+	}
+	
+	function createBeanBag(xloc,yloc,color,val) {
+		var c = new createjs.Container();
+		var bg = new createjs.Shape();
+		var pt = RADIUS;
+		bg.graphics.setStrokeStyle(2).beginStroke("#000000");
+		bg.graphics.beginFill(color).rr(0,0,40,40,3).endFill();
+//		bg.alpha = 0.5;
+		bg.name = "tile";
+		c.addChild(bg);	
+		var text = new createjs.Text("Drop", "bold 12px Arial", "#000000");
+		text.textAlign="center";
+		text.mouseEnabled = false;
+        text.x = 20;
+        text.y = 25;
+        text.textBaseline = "alphabetic";
+//        text.visible = false;
+        c.addChild(text);
+		c.x = xloc;
+		c.y = yloc;
+		c.rootX = xloc;
+		c.rootY = yloc;
+		c.index = -1;
+		c.val = val;
+		c.alpha = 1;
+		c.regX = 15;
+		c.regY = 15; 
+		c.set = false;
+
+		if (yloc >= 100) {
+//			c.index = tileCount;
+//			tileCount++;
+//			tiles.push(c);		
+		} else
+			c.index = -1;
+		c.cursor = "move";
+		
+		c.on("mousedown", function (evt) {
+			downTime = new Date().getTime();
+			c.oldX = c.x;
+			c.oldY = c.y;
+			if (c.set)
+				return;
+			this.parent.addChild(this);
+			this.offset = {x: this.x - evt.stageX, y: this.y - evt.stageY};
+		});
+
+		c.on("click", function (evt) {
+			if (Math.abs(c.oldX - c.x) > 5 && Math.abs(c.oldY - c.y) > 5)
+				return;
+			if (!c.set)
+				return;
+			else {
+				c.mult.tweenCount++;
+				var nextTile = c.mult.tweenCount*c.mult.val;
+				var col = (nextTile-2) % 6;
+				var row = Math.floor((nextTile-2) / 6);
+				var xloc = col*40+40;
+				var yloc = 960-row*40;
+				tossBag(c.x,c.y,xloc,yloc,color,c);
+			}
+			getOut();	
+		});
+		c.on("pressup", function (evt) {
+			if (c.set) {
+				c.x = xloc;
+				c.y = yloc;
+				return;
+			}
+			update = true;
+			if (Math.abs(c.oldX - c.x) < 2 && Math.abs(c.oldY - c.y) < 2)
+				return;
+			c.x = Math.round(c.x/40)*40;
+			c.y = Math.round(c.y/40)*40;
+			c.col = c.x/40-1;
+			c.row = 24 - c.y/40;
+			c.val = c.row*6+c.col+2;
+			console.log(c.x + ":"+c.y + ":" +c.col + ":" + c.row + ":" +c.val);
+			if (c.col < 0 || c.col  > 5 || c.row < 0 || c.row > 11 ||
+				c.set == true ||
+				(c.row == 1 && c.col == 5) ) {
+				createjs.Tween.get(c, {loop: false}, null, false) // get a new tween targeting
+				.to({x: xloc, y: yloc}, 1000, createjs.Ease.get(1)) // tween x/y/alpha properties over 1s (1000ms) with ease out
+			} else {
+				//instantiate object using the constructor function
+				var mult = new Multiple(color);
+				mult.val = c.val;
+				mult.count = 1;
+				console.log(mult.getInfo());
+				multiples.push(mult);
+				drawTileColors();	
+				c.set = true;
+				c.cursor = "pointer";
+				c.mult = mult;
+				console.log(c.mult.val);
+				c.getChildAt(1).text = "Toss";
+				c.x = xloc;
+				c.y = yloc;
+			}
+
+			return;
+			getOut();
+
+		});
+
+		// the pressmove event is dispatched when the mouse moves after a mousedown on the target until the mouse is released.
+		c.on("pressmove", function (evt) {
+			if (!c.set) {
+				this.x = evt.stageX + this.offset.x;
+				this.y = evt.stageY + this.offset.y;
+				// indicate that the stage should be updated on the next tick:
+				update = true;
+			}
+		});
+		return c;
+	}
+
+	function tossBag(startX,startY,endX,endY,color,parent) {
+		var c = new createjs.Container();
+		var bg = new createjs.Shape();
+		var pt = RADIUS;
+		bg.graphics.setStrokeStyle(2).beginStroke("#000000");
+		bg.graphics.beginFill(color).rr(0,0,40,40,3).endFill();
+//		bg.alpha = 0.5;
+		bg.name = "tile";
+		c.addChild(bg);	
+		c.x = startX;
+		c.y = startY;
+		c.alpha = 1;
+		c.regX = 15;
+		c.regY = 15; 
+		stage.addChild(c);
+			createjs.Tween.get(c, {loop: false}, null, false) 
+			.to({x: endX, y: endY, rotation: 720}, 750, createjs.Ease.get(1))
+			.call(handleComplete);
+		function handleComplete() {
+			stage.removeChild(c);
+			update = true;
+			parent.mult.count++;
+ 			drawTileColors();
+       }
+	}
+	function tossAll() {
+		var c = new createjs.Container();
+		var bg = new createjs.Shape();
+		bg.graphics.setStrokeStyle(2).beginStroke("#000000");
+		bg.graphics.beginFill("CYAN").rr(0,0,50,50,3).endFill();
+		bg.name = "tile";
+		bg.alpha = .5;
+		c.addChild(bg);	
+		var text = new createjs.Text("Toss All", "bold 12px Arial", "#000000");
+		text.textAlign="center";
+		text.mouseEnabled = false;
+        text.x = 25;
+        text.y = 25;
+        text.textBaseline = "alphabetic";
+//        text.visible = false;
+        c.addChild(text);		
+        c.x = 300;
+		c.y = 950;
+		c.regX = 15;
+		c.regY = 15; 
+		c.on("rollover", function (evt) {
+				console.log("mouse over");
+				bg.alpha = 1;
+				update = true;
+		});
+		c.on("rollout", function (evt) {
+				console.log("mouse out");
+				bg.alpha = .5;
+				update = true;
+		});
+		c.on("click", function (evt) {
+			for (var i = 0; i < multiples.length; i++) {
+				multiples[i].count = 144/multiples[i].val;
+				multiples[i].tweenCount = multiples[i].count;
+			}
+			drawTileColors();
+		});
+		stage.addChild(c);
+	}
+
+	function Multiple (color) {
+		this.color = color;
+		this.val = 0;
+		this.count = 1;
+		this.tweenCount = 1;
+		this.getInfo = function getInfo() {
+			return 'A ' + this.val + ' ' + this.color + '.';
+		};
+	}
+ 
+
+
+	function drawTileColors() {
+		// Clear color arrays for all tiles
+		for (var i = 0; i < 144; i++) {
+			var tile = tiles[i].getChildAt(0);
+			tile.colors.length = 0;
+		}		
+		for (var j = 0; j < multiples.length; j++) {
+			var fillCount = 0;
+			for (var i = multiples[j].val-2; i < 144; i++) {
+				if ((i+2)%multiples[j].val == 0) {
+					fillCount++;
+					var tile = tiles[i].getChildAt(0);
+					tile.colors.push(multiples[j].color);
+					if (fillCount >= multiples[j].count)
+						break;
+				}
+			}
+		}
+		for (var i = 0; i < 144; i++) {
+			var tile = tiles[i].getChildAt(0);
+			tile.graphics.clear();
+			drawTile(tile);
+			tile.alpha = .7;
+		}
+	}
+	
+	function drawTile(tile) {
+		var color = tile.baseColor;
+		if (tile.colors.length == 0) {
+			color = tile.baseColor;
+			tile.graphics.beginFill(color);
+			tile.graphics.beginStroke("#000000").rr(0, 0, 40, 40,3);
+		} else {
+			var rows = tile.colors.length;
+			var rowWidth = 40/rows;
+			for (var i = 0; i < rows; i++) {
+				tile.graphics.beginFill(tile.colors[i]);
+				tile.graphics.rr(0, rowWidth*i, 40, rowWidth,3);
+			}
+		}
+		tile.graphics.endFill().setStrokeStyle(2).beginStroke("#000000").rr(0, 0, 40, 40,3);
+	}
+	function createTile(xloc,yloc,value) {		
+		var tC = new createjs.Container();
+		tC.x = xloc-15;
+		tC.y = yloc-15;
+		var tile = new createjs.Shape();
+		tile.baseColor = "#FFF8DC";
+		tile.colors = [];
+		drawTile(tile);
+//		tile.graphics.beginFill("CYAN");
+//		tile.graphics.setStrokeStyle(1).beginStroke("#000000").rr(0, 0, 40, 40,3);
+		tile.alpha = 1;
+		tile.name = "tile";
+		tC.addChild(tile);
+//		console.log(tC.tile.name);
+		var text = new createjs.Text(value, "bold 20px Arial", "#000000");
+		text.textAlign="center";
+		text.mouseEnabled = false;
+        text.x = 20;
+        
+        text.y = 25;
+        text.textBaseline = "alphabetic";
+
+        tC.addChild(text);
+		tC.row = xloc/40;
+		tC.col = 23-yloc/40
+		tC.selected = false;
+		tC.set = false;
+		tC.val = tile.row*6+tile.col+2;
+		tiles[tileCount] = tC;
+		tileCount++;
+        return tC;
+
+	}
+ 
+
+	function createStage() {
+
+		var graphics = new createjs.Graphics();
+		graphics.setStrokeStyle(1).beginStroke("#D3D3D3").drawRect(5, 5, 370, 1000);
+		graphics.setStrokeStyle(1).beginStroke("#D3D3D3").drawRect(10, 10, 360, 990);
+		var shape = new createjs.Shape(graphics);
+        container.addChild(shape);
+        tossAll();
+        var resetImage = new Image();
+		resetImage.src = "../images/resetButton.png";
+		resetImage.onload = handleResetButtonLoad;
+	}
+	
+	function handleResetButtonLoad(event) {
+	
+		var image = event.target;
+		var bitmap = new createjs.Bitmap(image);
+		container.addChild(bitmap);
+		var text = new createjs.Text("Start Over", "12px Arial", "#000000");
+        text.x = 290;
+        text.y = 590;
+        text.textBaseline = "alphabetic";
+        container.addChild(text);
+		bitmap.regX = bitmap.image.width / 2 | 0;
+		bitmap.regY = bitmap.image.height / 2 | 0;
+		bitmap.scaleX = bitmap.scaleY = bitmap.scale = 1;
+		bitmap.name = "bmp_resetButton";
+		bitmap.cursor = "pointer";
+		this.scaleX = this.scaleY = this.scale;
+		bitmap.x = 310;
+		bitmap.y = 550
+		bitmap.on("click",function (evt) {
+			resetAll();
+		});
+		bitmap.on("rollover", function (evt) {
+			this.scaleX = this.scaleY = this.scale * 1.2;
+			update = true;
+		});
+
+		bitmap.on("rollout", function (evt) {
+			this.scaleX = this.scaleY = this.scale;
+			update = true;
+		});
+	}
+	
+
+
+	function tick(event) {
+		// this set makes it so the stage only re-renders when an event handler indicates a change has happened.
+		if (update) {
+			update = false; // only update once
+			stage.update(event);
+		}
+	}
+	
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+function getOut() {
+	return;
+	var outtxt = num100*100+num10*10+num1; 
+	if (qn != null) {
+		parent.postMessage(qn+"::"+outtxt,'*');
+//		alert(qn+"::"+outtxt);
+	}	
+}
+
+function resize() {
+		var canvas = document.querySelector('canvas');
+		var ctx = canvas.getContext('2d');
+
+	// Our canvas must cover full height of screen
+	// regardless of the resolution
+	console.log("resizing");
+	var height = window.innerHeight;
+	
+	// So we need to calculate the proper scaled width
+	// that should work well with every resolution
+	var ratio = canvas.width/canvas.height;
+	var width = height * ratio;
+	
+	canvas.style.width = width+'px';
+	canvas.style.height = height+'px';
+}
+</script>
+</head>
+<body onload="init();">
+<div style="position:relative">
+  <div style="position:absolute;top:0px;left:0px">
+    <canvas id="testCanvas" width="600px" height="1100px"></canvas>
+  </div>
+</div>
+</body>
+</html>

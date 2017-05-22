@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Fraction Bars Virtual Manipulative</title>
+    <meta name="keywords" content="Virtual Manipulative, Fraction Bars, OER, Open Education Resources, math, math manipulative, problem solving, pattern blocks, algebra">
+	<meta name="description" content="OpenVML - OER Library of Virtual Manipulatives.  Fraction Bars Virtual Manipulative">
+
+	<script src="../lib/easeljs-NEXT.combined.js"></script>
+	<script type="text/javascript" src="../lib/tweenjs-NEXT.combined.js"></script>
+
+<script id="editable">
+	/*
+	   Description:  Developed by William Meacham and Frank Marfai in collaboration with Phoenix College and Scottsdale Community College.
+	                 This is an Open Educational Resource (OER) designed to help students understand the fundamental concepts of mathematics.
+					 For more information, contact William.Meacham@Scottsdalecc.edu  
+	                 Copyright 2017: NonCommercial ShareAlike - International 4.0 - 
+	*/
+	var canvas, stage, container;
+	var barWidth = 150;
+	var barHeight = 30;
+	var baseRods = [];
+	var rods = [];
+	var rodCount = 0;
+	var currentRow = 2;
+	var currentCol = 2;
+	var moving = false;
+    var currentAlpha = 1;
+    var snap = true;
+    
+	function init() {
+		qn = getParameterByName("qn");
+		initValue = getParameterByName("inVal");
+		if (initValue != null) {
+			in100 = Math.floor(initValue/100);
+			in10 = Math.floor(initValue%100/10);
+			in1 = initValue%10;
+//			alert(in100 + "," + in10 + "," + in1);
+		}
+		resize();
+		// create stage and point it to the canvas:
+		canvas = document.getElementById("testCanvas");
+		stage = new createjs.Stage(canvas);
+
+		// enable touch interactions if supported on the current device:
+		createjs.Touch.enable(stage);
+
+		// enabled mouse over / out events
+		stage.enableMouseOver(10);
+		stage.mouseMoveOutside = true; // keep tracking the mouse even when it leaves the canvas
+
+	    container = new createjs.Container();
+		stage.addChild(container);
+
+ 
+		createStage();
+		stage.addChild(drawFractionBar(160,80,1,"GREY",0));
+        stage.addChild(drawFractionBar(160,120,2,"#00AA00",1));
+        stage.addChild(drawFractionBar(320,40,3,"YELLOW",2));
+        stage.addChild(drawFractionBar(320,80,4,"BLUE",3));
+        stage.addChild(drawFractionBar(320,120,5,"#BA55D3",4));
+        stage.addChild(drawFractionBar(480,40,6,"RED",5));
+        stage.addChild(drawFractionBar(480,80,10,"#D3D3D3",6));
+        stage.addChild(drawFractionBar(480,120,12,"ORANGE",7));
+		stage.addChild(createRadioButtonSelect(200,370,setLayer,"Add Transparent Pieces",false));
+		stage.addChild(createRadioButtonSelect(200,400,setSnap,"Snap To Grid",true));
+
+
+
+		createjs.Ticker.setFPS(20);
+		createjs.Ticker.addEventListener("tick", stage);
+
+	}
+	
+	function resize() {
+			var canvas = document.querySelector('canvas');
+			var ctx = canvas.getContext('2d');
+
+		// Our canvas must cover full height of screen
+		// regardless of the resolution
+		console.log("resizing");
+		var height = window.innerHeight*.95;
+		
+		// So we need to calculate the proper scaled width
+		// that should work well with every resolution
+		var ratio = canvas.width/canvas.height;
+		var width = height * ratio;
+		
+		canvas.style.width = width+'px';
+		canvas.style.height = height+'px';
+	}
+	function stop() {
+		createjs.Ticker.removeEventListener("tick", tick);
+	}
+	
+	function drawBar(x,y,uWidth,color,set,index) {
+        var bg = new createjs.Shape();
+        bg.index = index;
+        bg.set = set;
+        bg.xloc = x;
+        bg.yloc = y;
+        bg.uWidth = uWidth;
+		bg.graphics.ss(1).s("black").beginFill(color);
+		bg.graphics.dr(x, y, uWidth, barHeight);
+		bg.graphics.endFill();
+	    bg.on("click", function (evt) {
+	    	if (Math.abs(bg.oldX - bg.parent.x) >= 3 || Math.abs(bg.oldY - bg.parent.y) >=  3)
+				return;
+    		shadeFractionBar(bg.parent,bg.index,bg.set);
+		});
+		bg.on("mousedown", function (evt) {
+			bg.oldX = bg.parent.x;
+			bg.oldY = bg.parent.y;
+			this.parent.addChild(this);
+			this.offset = {x: this.x - evt.stageX, y: this.y - evt.stageY};
+		});
+		return bg;
+	}
+    function shadeFractionBar(dragger,index,set) {
+    	for (var i = 0; i < dragger.den; i++) {
+    		var bg = dragger.bars[i];
+    		bg.graphics.clear();
+    		bg.graphics.s("black").beginFill("WHITE");
+	    	bg.graphics.dr(bg.xloc, bg.yloc, bg.uWidth, barHeight);
+	    	bg.set = 0;
+	    	bg.graphics.endFill();
+	    	bg.alpha = currentAlpha;
+	    }
+	    if (set == 1)
+	    	index--;
+	    for (var i = 0; i <= index; i++) {
+    		var bg = dragger.bars[i];
+    		bg.graphics.s("black").beginFill(dragger.color);
+	    	bg.graphics.dr(bg.xloc, bg.yloc, bg.uWidth, barHeight);
+	    	bg.graphics.endFill();
+	    	bg.set = 1;
+	    	bg.alpha = currentAlpha;
+	    }	
+    }
+	
+    function drawFractionBar(xloc,yloc,den,color,index) {
+    	
+    	var uWidth = barWidth/den;
+ 		var dragger = new createjs.Container();
+		baseRods[index] = dragger;
+		dragger.saved = false;
+		dragger.index = -1;
+		dragger.den = den;
+		dragger.x = xloc;
+		dragger.y = yloc;
+		dragger.color = color;
+		dragger.regX = barWidth/2;
+		dragger.regY = barHeight/2; 
+		dragger.bars = [];
+//		dragger.alpha = currentAlpha;
+		var barGrid = new createjs.Shape();
+   		barGrid.graphics.ss(2).s("black");
+		for (var i = 0; i < dragger.den; i++) {
+	    	barGrid.graphics.dr(i*uWidth, 0, uWidth, barHeight);
+    	}
+    	dragger.addChild(barGrid);
+   		var bar = drawBar(0,0,uWidth,color,1,0);
+   		bar.alpha = currentAlpha;
+		dragger.addChild(bar);
+		dragger.bars.push(bar);
+		for (var i = 1; i < den; i++) {
+			bar = drawBar(i*uWidth,0,uWidth,"WHITE",0,i);
+			bar.alpha = currentAlpha;
+			dragger.bars.push(bar);
+			dragger.addChild(bar);
+		}
+		dragger.scaleX = dragger.scaleY = dragger.scale = 1;
+		
+		dragger.on("rollover", function (evt) {
+				this.scaleX = this.scaleY = this.scale * 1.01;
+				update = true;
+		});
+		dragger.on("rollout", function (evt) {
+				rotateLeft = rotateRight = false;
+				this.scaleX = this.scaleY = this.scale;
+				update = true;
+		});	
+		dragger.on("mousedown", function (evt) {
+
+			dragger.oldX = dragger.x;
+			dragger.oldY = dragger.y;
+			this.parent.addChild(this);
+			this.offset = {x: this.x - evt.stageX, y: this.y - evt.stageY};
+		});
+		dragger.on("pressmove", function (evt) {
+			this.x = evt.stageX + this.offset.x;
+			this.y = evt.stageY + this.offset.y;
+			// indicate that the stage should be updated on the next tick:
+			update = true;
+		});   	
+
+		dragger.on("pressup", function (evt) {
+			if (Math.abs(dragger.oldX - dragger.x) < 3 && Math.abs(dragger.oldY - dragger.y) < 3)
+				return;
+			if (dragger.x < 85 || dragger.x > 510 || dragger.y < 180 || dragger.y > 345) {
+				if (dragger.index != -1) {
+					rods.splice(dragger.index,1);
+					deleteRod(dragger);
+				}
+				else {
+					createjs.Tween.get(dragger, {loop: false}, null, false) // get a new tween targeting circle
+					.to({x: xloc, y: yloc}, 1000, createjs.Ease.get(1)) // tween x/y/alpha properties over 1s (1000ms) with ease out
+				}
+			} else if (dragger.index != -1) {
+				var x = dragger.x - 250;
+				var y = dragger.y - 10;
+				if (snap) {
+					dragger.x = Math.round(x/15)*15+250;
+					dragger.y = Math.round(y/15)*15+7;
+				}
+			} else {
+				var x = dragger.x - 250;
+				var y = dragger.y - 10;
+				if (snap) {
+					dragger.x = Math.round(x/15)*15+250;
+					dragger.y = Math.round(y/15)*15+7;
+				}
+				dragger.index = rodCount;
+				rodCount++;
+				rods.push(dragger);
+				stage.addChild(drawFractionBar(xloc,yloc,den,color,index));
+			}
+			update = true;
+		});
+		update = true;
+		return dragger;
+	}
+
+
+
+	function createStage() {
+		var resetImage = new Image();
+		var trashCanImage = new Image();
+		trashCanImage.src = "../images/TrashCan.JPG";
+		trashCanImage.onload=handleTrashCanLoad;
+		resetImage.src = "../images/resetButton.png";
+		resetImage.onload = handleResetButtonLoad;
+		var graphics = new createjs.Graphics();
+		graphics.setStrokeStyle(2).beginStroke("#D3D3D3").drawRect(5, 5, 580, 450);
+		graphics.setStrokeStyle(2).beginStroke("#D3D3D3").drawRect(10, 10, 570, 155);
+		graphics.setStrokeStyle(2).beginStroke("#D3D3D3").beginFill("#FFF8DC").drawRect(10, 170, 570, 180);
+        graphics.alpha=0.25;
+        for (var i = 0; i < 11; i++)
+        	graphics.mt(10,185+i*15).lt(580,185+i*15);
+        for (var i = 0; i < 37; i++)
+        	graphics.mt(25+i*15,170).lt(25+i*15,350);
+        
+		var shape = new createjs.Shape(graphics);
+        container.addChild(shape);
+	}
+	
+	function handleResetButtonLoad(event) {
+
+		var image = event.target;
+		var bitmap = new createjs.Bitmap(image);
+		container.addChild(bitmap);
+		var text = new createjs.Text("Start Over", "12px Arial", "#000000");
+        text.x = 500;
+        text.y = 430;
+        text.textBaseline = "alphabetic";
+        container.addChild(text);
+		bitmap.regX = bitmap.image.width / 2 | 0;
+		bitmap.regY = bitmap.image.height / 2 | 0;
+		bitmap.scaleX = bitmap.scaleY = bitmap.scale = 1;
+		bitmap.name = "bmp_resetButton";
+		bitmap.cursor = "pointer";
+		this.scaleX = this.scaleY = this.scale;
+		bitmap.x = 520;
+		bitmap.y = 390
+		bitmap.on("click",function (evt) {
+			for (var i = 0; i < rodCount;i++) {
+				deleteRod(rods.pop());
+			}
+			rodCount = 0;
+			currentRow = 2;
+			currentCol = 2;
+		 });
+		bitmap.on("rollover", function (evt) {
+			this.scaleX = this.scaleY = this.scale * 1.2;
+			update = true;
+		});
+
+		bitmap.on("rollout", function (evt) {
+			this.scaleX = this.scaleY = this.scale;
+			update = true;
+		});
+	}
+
+	function handleTrashCanLoad(event) {
+		var image = event.target;
+		var bitmap = new createjs.Bitmap(image);
+		container.addChild(bitmap);
+		bitmap.regX = bitmap.image.width / 2 | 0;
+		bitmap.regY = bitmap.image.height / 2 | 0;
+		bitmap.scaleX = bitmap.scaleY = bitmap.scale = 1;
+		bitmap.name = "bmp_resetButton";
+		bitmap.cursor = "pointer";
+		this.scaleX = this.scaleY = this.scale;
+
+		bitmap.x = 450;
+		bitmap.y = 390;
+		this.scaleX = this.scaleY = this.scale;
+		bitmap.on("rollover", function (evt) {
+			this.scaleX = this.scaleY = this.scale * 1.2;
+			update = true;
+		});
+
+		bitmap.on("rollout", function (evt) {
+			this.scaleX = this.scaleY = this.scale;
+			update = true;
+		});
+
+	}
+	function tick(event) {
+		// this set makes it so the stage only re-renders when an event handler indicates a change has happened.
+		if (update) {
+			update = false; // only update once
+			stage.update(event);
+		}
+	}
+	function deleteRod(dragger) {
+		createjs.Tween.get(dragger)
+		.to({alpha:0, visible:false}, 500);
+	}	
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+function getOut() {
+	var outtxt = num100*100+num10*10+num1; 
+	if (qn != null) {
+		parent.postMessage(qn+"::"+outtxt,'*');
+//		alert(qn+"::"+outtxt);
+	}	
+}
+
+	function createRadioText(xloc,yloc,label) {
+		var hsText = new createjs.Text(label, "12px Arial", "#000000");
+        hsText.x = xloc;
+        hsText.y = yloc;
+        hsText.textBaseline = "alphabetic";
+        return hsText;
+    }
+	
+	function createRadioButtonSelect(xloc,yloc, callFunction, text, selected) {
+		var rC = new createjs.Container();
+		rC.x = xloc+15;
+		rC.y = yloc;
+		rC.selected = selected;
+		rC.addChild(createRadioText(35,5,text));
+		var hs = new createjs.Shape();
+		hs.graphics.beginFill("#0000FF").setStrokeStyle(2);
+		hs.graphics.drawCircle(5, 5, 10).endFill();	
+		hs.regX = 1.5;
+		hs.regY = -1.5;
+		hs.x = 15;
+		hs.y = 5;
+		rC.addChild(hs);
+		if (selected) 
+			hs.alpha = 1;
+		else
+			hs.alpha = .2;
+		hs.on("rollover", function (evt) {
+			if (!rC.selected)
+				hs.alpha = .6;
+			update = true;   
+		});
+		hs.on("rollout", function (evt) {
+			if (!rC.selected)
+				hs.alpha = .2;
+			update = true;
+		});
+		hs.on("click", function (evt) {
+			if (rC.selected == true) {
+				hs.alpha = .2;
+				rC.selected = false;
+			} else {
+				rC.selected = true;
+				hs.alpha = 1;
+			}
+			callFunction(rC.selected);
+		});		
+		return rC;
+	}
+	function setLayer(transparent){
+		console.log("Set Layer Called");
+		if (transparent) {
+			currentAlpha = .5;
+		} else {
+			currentAlpha = 1;
+		}
+		for (var i = 0; i < 8; i++)
+		  for (var j = 0; j < baseRods[i].bars.length; j++)
+		    baseRods[i].bars[j].alpha = currentAlpha;
+	}
+
+	function setSnap(newSnap){
+		console.log("Set Snap Called");
+		snap = newSnap;
+	}
+
+</script>
+</head>
+<body onload="init();">
+<div style="position:relative">
+  <div style="position:absolute;top:0px;left:0px">
+    <canvas id="testCanvas" width="600px" height="500px"></canvas>
+  </div>
+</div>
+</body>
+</html>

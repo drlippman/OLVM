@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<meta charset="utf-8">
+	<title>Paper Folding Virtual Manipulative</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" type="text/javascript"></script>
+	<script src="../lib/easeljs-NEXT.combined.js"></script>
+	<script type="text/javascript" src="../lib/tweenjs-NEXT.combined.js"></script>
+
+<script id="editable" type="text/javascript">
+	var canvas, stage, stageContainer;
+	var paperC1, paperC2;
+	var paper1, paper2;
+
+	function init() {
+		qn = getParameterByName("qn");
+		initValue = getParameterByName("scale");
+		if (initValue != null) {
+			tileCount = initValue;
+		}
+		resize();
+		// create stage and point it to the canvas:
+		canvas = document.getElementById("testCanvas");
+		stage = new createjs.Stage(canvas);
+
+		// enable touch interactions if supported on the current device:
+		createjs.Touch.enable(stage);
+
+		// enabled mouse over / out events
+		stage.enableMouseOver(10);
+		stage.mouseMoveOutside = true; // keep tracking the mouse even when it leaves the canvas
+		createStage();
+	    stageContainer = new createjs.Container();
+		stage.addChild(stageContainer);
+	
+		createjs.Ticker.setFPS(50);
+        createjs.Ticker.addEventListener("tick", stage);
+	}
+
+	function createStage() {
+		var resetImage = new Image();
+		resetImage.src = "../images/resetButton.png";
+		resetImage.onload = handleResetButtonLoad;
+		var undoImage = new Image();
+		undoImage.src = "../images/resetButton.png";
+		undoImage.onload = handleUndoButtonLoad;
+		var graphics = new createjs.Graphics();
+		graphics.setStrokeStyle(1).beginStroke("#D3D3D3").drawRect(5, 5, 600, 560);
+		graphics.setStrokeStyle(1).beginStroke("#D3D3D3").drawRect(10, 10, 590, 550);
+		graphics.setStrokeStyle(1).beginStroke("#D3D3D3").beginFill("#FFF8DC").drawRect(150, 10, 450, 450);
+		stage.addChild(createTitleText(25,20,"PAPER FOLDING"));
+		stage.addChild(createPaper(30,30,paperC1,1));
+		stage.addChild(createPaper(330,30,paperC2,2));
+        
+    }
+	
+	function createPaper(xloc,yloc,paperC,val) {
+		paperC = new createjs.Container();
+		var paper = new createjs.Shape();
+		paperC.x = xloc;
+		paperC.y = yloc;
+		paper.val = val;
+		paper.rows = 1;
+		paper.cols = 1;
+		paper.selRows = 0;
+		paper.selCols = 0;
+		drawPaper(paper);
+		paperC.addChild(paper);
+		var text1 = new createjs.Text("Rows", "12px Arial", "#000000");
+        text1.x = 0;
+        text1.y = 295;
+        text1.textBaseline = "alphabetic";
+		var text2 = new createjs.Text("Cols", "12px Arial", "#000000");
+        text2.x = 100;
+        text2.y = 295;
+        text2.textBaseline = "alphabetic";
+        paperC.addChild(text1);
+        paperC.addChild(text2);
+		paperC.addChild(createShiftB(50,280,addRows,paper,90));
+		paperC.addChild(createShiftB(50,300,removeRows,paper,270));
+		paperC.addChild(createShiftB(140,290,removeCols,paper,0));
+		paperC.addChild(createShiftB(160,290,addCols,paper,180));
+		if (val == 1)
+			paper.slider = createHorizSlider(0,260,paper);
+		else
+			paper.slider = createVertSlider(0,260,paper);
+		paperC.addChild(paper.slider);
+		
+		stage.addChild(paperC);
+	}
+	
+	function createHorizSlider(xloc,yloc,paper) {
+		var hotSpot = new createjs.Shape();
+		hotSpot.graphics.beginFill("rgba(0,255,0,0.5)");
+		hotSpot.graphics.setStrokeStyle(1).beginStroke("#F00");
+		hotSpot.graphics.drawCircle(10, 20, 10).endFill();	
+		hotSpot.regX = 10;
+		hotSpot.regY = 10;
+		hotSpot.x = xloc;
+		hotSpot.y = yloc;
+		hotSpot.cursor = "ew-resize";
+		hotSpot.scaleX = hotSpot.scaleY = hotSpot.scale = 1;		
+		hotSpot.on("rollover", function (evt) {
+			hotSpot.scaleX = hotSpot.scaleY = hotSpot.scale = 1.02;		
+			this.parent.addChild(this);
+			this.offset = {x: this.x - evt.stageX, y: this.y - evt.stageY};
+			update = true;   
+		});
+		hotSpot.on("rollout", function (evt) {
+			hotSpot.scaleX = hotSpot.scaleY = hotSpot.scale = 1;
+			update = true;
+		});
+		hotSpot.on("pressmove", function (evt) {
+			if (evt.stageX < 300){
+				var step = Math.floor(270/paper.cols);
+				if (evt.stageX - 30 - this.x > step * .7) {
+					this.x += step;
+					paper.selCols++;
+					drawPaper(paper);
+				} else if (this.x - evt.stageX +30 > step * .7) {
+					this.x -= step;
+					paper.selCols--;
+					drawPaper(paper);
+				}
+//			this.y = evt.stageY + this.offset.y;
+			}
+			// indicate that the stage should be updated on the next tick:
+			update = true;
+		});
+		return hotSpot;
+	}
+		function createVertSlider(xloc,yloc,paper) {
+		var hotSpot = new createjs.Shape();
+		hotSpot.graphics.beginFill("rgba(0,255,0,0.5)");
+		hotSpot.graphics.setStrokeStyle(1).beginStroke("#F00");
+		hotSpot.graphics.drawCircle(10, 20, 10).endFill();	
+		hotSpot.regX = 10;
+		hotSpot.regY = 10;
+		hotSpot.x = xloc;
+		hotSpot.y = yloc;
+		hotSpot.cursor = "ns-resize";
+		hotSpot.scaleX = hotSpot.scaleY = hotSpot.scale = 1;		
+		hotSpot.on("rollover", function (evt) {
+			hotSpot.scaleX = hotSpot.scaleY = hotSpot.scale = 1.02;		
+			this.parent.addChild(this);
+			this.offset = {x: this.x - evt.stageX, y: this.y - evt.stageY};
+			update = true;   
+		});
+		hotSpot.on("rollout", function (evt) {
+			hotSpot.scaleX = hotSpot.scaleY = hotSpot.scale = 1;
+			update = true;
+		});
+		hotSpot.on("pressmove", function (evt) {
+			if (evt.stageY < 320){
+				var step = Math.floor(270/paper.rows);
+				if (evt.stageY -30 - this.y > step * .8) {
+					this.y += step;
+					paper.selRows--;
+					drawPaper(paper);
+				 } else if (this.y - evt.stageY + 30 > step * .8) {
+					this.y -= step;
+					paper.selRows++;
+					drawPaper(paper);			
+				}
+//			this.y = evt.stageY + this.offset.y;
+			}
+			// indicate that the stage should be updated on the next tick:
+			update = true;
+		});
+		return hotSpot;
+	}
+
+	function resize() {
+		var canvas = document.querySelector('canvas');
+		var ctx = canvas.getContext('2d');
+
+		// Our canvas must cover full height of screen
+		// regardless of the resolution
+		console.log("resizing");
+		var height = window.innerHeight*.95;
+		
+		// So we need to calculate the proper scaled width
+		// that should work well with every resolution
+		var ratio = canvas.width/canvas.height;
+		var width = height * ratio;
+		
+		canvas.style.width = width+'px';
+		canvas.style.height = height+'px';
+	}
+	
+
+
+	function drawPaper(paper) {
+		console.log("Drawing");
+		var colWidth = 270/paper.cols;
+		var rowWidth = 270/paper.rows;
+		paper.graphics.clear();
+		paper.graphics.setStrokeStyle(1).beginStroke("BLACK").dr(0,0,270,270);
+		paper.graphics.beginFill("rgba(0,0,255,0.5)");
+		if (paper.val == 1) {
+			for (var i = 0; i < paper.selCols; i++) 
+				paper.graphics.dr(colWidth*i,0,colWidth,270);
+		} else {
+			console.log(paper.selRows);
+			for (var i = 0; i < paper.selRows; i++) {
+				console.log(0 + ":" + 270 - rowWidth*i + ":" + 270 + ":" + -rowWidth);
+				paper.graphics.dr(0,270 - rowWidth*i,270,-rowWidth);
+			}
+		}
+
+		for (var i = 0; i < paper.rows; i++) {
+			paper.graphics.mt(0,rowWidth*i).lt(270,rowWidth*i);
+		}
+		for (var i = 0; i < paper.cols; i++) {
+			paper.graphics.mt(colWidth*i,0).lt(colWidth*i,270);
+		}		
+		update = true;
+	}
+	
+	function addCols(paper) {
+		console.log("In addCols");
+		if (paper.cols < 10) {
+			paper.cols++;
+			if (paper.val == 1) {
+				paper.selCols = 0;
+				paper.slider.x = 0;
+				paper.slider.y = 260;
+			}
+			drawPaper(paper);
+		}
+	}
+	function removeCols(paper) {
+		if (paper.cols > 1) {
+			paper.cols--;
+			if (paper.val == 1) {
+				paper.selCols = 0;
+				paper.slider.x = 0;
+				paper.slider.y = 260;
+			}
+			drawPaper(paper);
+		}
+	}
+
+	function addRows(paper) {
+		if (paper.rows < 10) {
+			paper.rows++;
+			if (paper.val == 2) {
+				paper.selRows = 0;
+				paper.slider.x = 0;
+				paper.slider.y = 260;
+			}
+			drawPaper(paper);
+		}
+	}
+
+	function removeRows(paper) {
+			if (paper.rows > 1) {
+			paper.rows--;
+			if (paper.val == 2) {
+				paper.selRows = 0;
+				paper.slider.x = 0;
+				paper.slider.y = 260;
+			}
+			drawPaper(paper);
+		}
+	}
+
+	
+	function createShiftB(xloc,yloc, callFunction,paper,rotation) {
+		var rC = new createjs.Container();
+		rC.x = xloc;
+		rC.y = yloc;
+		rC.rotation = rotation;
+		var hs = new createjs.Shape();
+		hs.graphics.beginFill("#0000FF").setStrokeStyle(2);
+		hs.graphics.mt(0,10).lt(10,0).lt(10,20).lt(0,10).endFill();	
+		hs.regX = 5;
+		hs.regY = 10;
+		rC.addChild(hs);
+		hs.alpha = .2;
+		hs.on("rollover", function (evt) {
+			hs.alpha = .6;
+			update = true;   
+		});
+		hs.on("rollout", function (evt) {
+			hs.alpha = .2;
+			update = true;
+		});
+		hs.on("mousedown",function(evt) {
+			hs.alpha = 1;
+		});
+		hs.on("mouseup",function(evt) {
+			hs.alpha = .6;
+		});
+		hs.on("click", function (evt) {
+			callFunction(paper);
+		});		
+		return rC;
+	}
+
+ 
+
+	
+	function handleUndoButtonLoad(event) {
+		undoButton = new createjs.Container();
+		var image = event.target;
+		var bitmap = new createjs.Bitmap(image);
+		undoButton.visible = false;
+		undoButton.addChild(bitmap);
+		var text = new createjs.Text("Undo", "12px Arial", "#000000");
+        text.x = 425;
+        text.y = 525;
+        text.textBaseline = "alphabetic";
+        undoButton.addChild(text);
+		bitmap.regX = bitmap.image.width / 2 | 0;
+		bitmap.regY = bitmap.image.height / 2 | 0;
+		bitmap.scaleX = bitmap.scaleY = bitmap.scale = 1;
+		bitmap.name = "bmp_undoButton";
+		bitmap.cursor = "pointer";
+		this.scaleX = this.scaleY = this.scale;
+		bitmap.x = 425;
+		bitmap.y = 490
+		stage.addChild(undoButton);
+		bitmap.on("click",function (evt) {
+			undoLastStep();
+		});
+		bitmap.on("rollover", function (evt) {
+			this.scaleX = this.scaleY = this.scale * 1.2;
+			update = true;
+		});
+
+		bitmap.on("rollout", function (evt) {
+			this.scaleX = this.scaleY = this.scale;
+			update = true;
+		});
+	}
+	
+	function handleResetButtonLoad(event) {
+	
+		var image = event.target;
+		var bitmap = new createjs.Bitmap(image);
+		stage.addChild(bitmap);
+		var text = new createjs.Text("Start Over", "12px Arial", "#000000");
+        text.x = 525;
+        text.y = 525;
+        text.textBaseline = "alphabetic";
+        stage.addChild(text);
+		bitmap.regX = bitmap.image.width / 2 | 0;
+		bitmap.regY = bitmap.image.height / 2 | 0;
+		bitmap.scaleX = bitmap.scaleY = bitmap.scale = 1;
+		bitmap.name = "bmp_resetButton";
+		bitmap.cursor = "pointer";
+		this.scaleX = this.scaleY = this.scale;
+		bitmap.x = 550;
+		bitmap.y = 490
+		bitmap.on("click",function (evt) {
+			resetStage();
+		});
+		bitmap.on("rollover", function (evt) {
+			this.scaleX = this.scaleY = this.scale * 1.2;
+			update = true;
+		});
+
+		bitmap.on("rollout", function (evt) {
+			this.scaleX = this.scaleY = this.scale;
+			update = true;
+		});
+	}	
+
+	function tick(event) {
+		// this set makes it so the stage only re-renders when an event handler indicates a change has happened.
+//		if (update) {
+//			update = false; // only update once
+			stage.update();
+//		}
+	}
+	
+	function createTitleText(xloc,yloc,label) {
+		var hsText = new createjs.Text(label, "bold 20px Arial", "BLUE");
+		hsText.shadow = 20;
+        hsText.x = xloc;
+        hsText.y = yloc;
+        hsText.textBaseline = "alphabetic";
+        return hsText;
+    }	
+	function getParameterByName(name, url) {
+		if (!url) url = window.location.href;
+		name = name.replace(/[\[\]]/g, "\\$&");
+		var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+			results = regex.exec(url);
+		if (!results) return null;
+		if (!results[2]) return '';
+		return decodeURIComponent(results[2].replace(/\+/g, " "));
+	}
+
+	function getOut() {
+		var selectCount = 0;
+		for (var i = 0; i < tiles.length; i++) {
+			if (tiles[i].selected == true)
+				selectCount++;
+		}
+		var outtxt = selectCount; 
+		parent.postMessage(qn+"::"+outtxt,'*');
+	}
+
+</script>
+</head>
+<body onload="init();">
+<div style="position:relative">
+  <div style="position:absolute;top:0px;left:0px">
+    <canvas id="testCanvas" width="620px" height="600px"></canvas>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>NumberLineZoom</title>
+
+	<script src="../lib/easeljs-NEXT.combined.js"></script>
+	<script type="text/javascript" src="../lib/tweenjs-NEXT.combined.js"></script>
+
+<script id="editable">
+	var canvas, stage, container;
+	var tic1 = 5, tic2 = 6;
+	var xMin = 10;
+	var xMax = 610;
+//	var yLoc = 300;
+	var step = 50;
+	var numberLines = [];
+	var scrollCount= 0;
+	var scrolling = false;
+	var BlueArrow = new Image();
+	
+	var RedArrow = new Image();
+	
+	function init() {
+		qn = getParameterByName("qn");
+		initValue = getParameterByName("inVal");
+		if (initValue != null && initValue != "") {
+			inRods = initValue.split(':');
+		}
+		var qt = getParameterByName("qt");
+		if (qt != null && qt != "") {
+			questionText = qt;
+		}
+		// create stage and point it to the canvas:
+		canvas = document.getElementById("testCanvas");
+		stage = new createjs.Stage(canvas);
+
+		// enable touch interactions if supported on the current device:
+		createjs.Touch.enable(stage);
+
+		// enabled mouse over / out events
+		stage.enableMouseOver(10);
+		stage.mouseMoveOutside = true; // keep tracking the mouse even when it leaves the canvas
+
+	    container = new createjs.Container();
+		stage.addChild(container);
+//		numberLines[0] = createNumberLine(0,   .1, .01,  10, 50,  1,3,0);
+//		numberLines[0] = createNumberLine(0,    1,  .1,  10, 150, 1,2,1);
+		numberLines[0] = createNumberLine(0,   10,   1,  10, 150, 1,1,2);
+		numberLines[1] = createNumberLine(0,  100,  10,  10, 250, 1,0,3);
+		numberLines[2] = createNumberLine(0, 1000, 100,  10, 350, 1,0,4);
+		createScrollBars();
+		createjs.Ticker.setFPS(30);
+		createjs.Ticker.addEventListener("tick", handleTick);
+	}
+	function handleTick(event) {
+		if (!event.paused) {
+			if (scrolling == false && scrollCount != 0) {
+				scrollNumberLine();
+			}
+			stage.update(event);
+        }
+    }
+
+	function stop() {
+		createjs.Ticker.removeEventListener("tick", tick);
+	}
+
+	function updateHotSpots(index,xloc,incr) {
+		var val = xloc/500*incr;
+		for (var i = 0; i < 3; i++) {
+			var hotSpot = numberLines[i].getChildByName("hotSpot");
+			hotSpot.x = val*500/numberLines[i].incr;
+			console.log(hotSpot.x);
+		}
+	}
+	function createScrollBars() {
+		BlueArrow.src = "../images/BlueArrowSmall.png";
+		BlueArrow.onload = handleBlueArrowLoad;
+		RedArrow.src = "../images/RedArrowSmall.png";
+		RedArrow.onload = handleRedArrowLoad;
+	}
+	
+	function handleRedArrowLoad() {
+		addScrollRight(event,0,5,200);
+		addScrollRight(event,1,5,300);
+		addScrollRight(event,2,5,400);
+	}
+	function handleBlueArrowLoad() {
+		addScrollLeft(event,0,490,200);
+		addScrollLeft(event,1,490,300);
+		addScrollLeft(event,2,490,400);
+	}
+
+
+	function scrollNumberLine(nl,dir) {
+		var newX;
+		var oldY = numberLines[nl].y;
+		newX = numberLines[nl].xLoc+500*dir;
+		if (newX <= 30 && newX >= -4600) {
+			numberLines[nl].xLoc = newX;
+			scrolling = true;
+			numberLines[nl].scaleFactor += dir;
+			createjs.Tween.get(numberLines[nl], {loop: false}, null, false) 
+				.to({x: newX, y: oldY}, 1000)
+				.call(handleComplete);
+		}
+	}
+	function handleComplete() {
+		scrolling = false;
+	}
+
+	function addScrollRight(event,nl,xloc,yloc) {
+		var image = event.target;
+		var hotSpot = new createjs.Bitmap(image);
+		hotSpot.alpha = .8;
+		hotSpot.cursor = "pointer";
+		hotSpot.scaleX = hotSpot.scaleY = hotSpot.scale = 1;		
+		hotSpot.on("rollover", function (evt) {
+			hotSpot.alpha = 1;
+			hotSpot.scaleX = hotSpot.scaleY = hotSpot.scale = 1.02;		
+			update = true;   
+		});
+		hotSpot.on("rollout", function (evt) {
+			hotSpot.alpha = .8;
+			hotSpot.scaleX = hotSpot.scaleY = hotSpot.scale = 1;
+			update = true;
+		});
+		hotSpot.on("click", function (evt) {
+			if (!scrolling) {
+				scrollNumberLine(nl,1);
+			}
+		});
+		hotSpot.x = xloc;
+		hotSpot.y = yloc;
+		hotSpot.nl = nl;
+		stage.addChild(hotSpot);	
+	}
+	function addScrollLeft(event,nl,xloc,yloc) {
+		var image = event.target;
+		var hotSpot = new createjs.Bitmap(image);
+		hotSpot.alpha = .8;
+		hotSpot.cursor = "pointer";
+		hotSpot.scaleX = hotSpot.scaleY = hotSpot.scale = 1;		
+		hotSpot.on("rollover", function (evt) {
+			hotSpot.alpha = 1;
+			hotSpot.scaleX = hotSpot.scaleY = hotSpot.scale = 1.02;		
+			update = true;   
+		});
+		hotSpot.on("rollout", function (evt) {
+			hotSpot.alpha = .8;
+			hotSpot.scaleX = hotSpot.scaleY = hotSpot.scale = 1;
+			update = true;
+		});
+		hotSpot.on("click", function (evt) {
+			if (!scrolling) {
+				scrollNumberLine(nl,-1);
+			}
+		});
+		hotSpot.x = xloc;
+		hotSpot.y = yloc;
+		hotSpot.nl = nl;
+		stage.addChild(hotSpot);	
+	}
+	function createNumberLine(tic0, tic10, incr, xLoc,yLoc,scale,precision,index) {
+		var c = new createjs.Container();
+		var bg = new createjs.Shape();
+		bg.graphics.ss(1).s("black").beginFill("CYAN");
+		bg.graphics.dr(-10,0,5050,70).endFill();
+		bg.graphics.setStrokeStyle(2).beginStroke("#000000");
+		bg.graphics.mt(0,20).lt(5020,20);
+		for (var i = 0; i <= 11; i++) {
+			bg.graphics.mt(10+i*500,10).lt(10+i*500,30);
+		}
+		for (j = 0; j < 10; j++) {
+			for (var i = 1; i < 10; i++) {
+				bg.graphics.mt(10+j*500 +i*step,15).lt(10+j*500 + i*step,25);
+			}
+		}
+		bg.on("click", function (evt) { 
+			var hotSpot = bg.parent.getChildByName("hotSpot");
+			console.log((evt.stageY-15)  + ":" + bg.parent.y);
+			if (Math.abs((evt.stageY-15)-bg.parent.y) < 30) {
+				hotSpot.x = evt.stageX-17;
+				updateHotSpots(index,hotSpot.x,incr);
+			}
+		});
+		bg.cursor = "pointer";
+		c.addChild(bg);
+		for (var i = 0; i <= 10; i++) {
+			var n0 = new createjs.Text(""+(tic0+(i*incr)), "14px Arial", "#000000");
+			n0.x = 10+500*i;
+			n0.y = 50;
+			n0.textAlign="center";
+			n0.textBaseline = "alphabetic";
+			c.addChild(n0);
+		}
+		for (j = 0; j < 10; j++) {
+			for (var i = 1; i < 10; i++) {
+				var nText = tic0+j*incr + i*incr/10;
+				nText = nText.toFixed(precision);
+				var n = new createjs.Text(""+nText, "12px Arial", "#000000");
+				n.x = 10+j*500+step*i;
+				n.y = 50;
+				n.textAlign="center";
+				n.textBaseline = "alphabetic";
+				c.addChild(n);
+			}
+		}
+		var hotSpot = new createjs.Shape();
+		hotSpot.graphics.beginFill("RED");
+		hotSpot.graphics.drawCircle(10, 20, 10).endFill();	
+		hotSpot.regX = 1.5;
+		hotSpot.regY = -1.5
+		hotSpot.alpha = 1;
+		hotSpot.cursor = "move";
+		hotSpot.scaleX = hotSpot.scaleY = hotSpot.scale = 1;		
+		hotSpot.on("rollover", function (evt) {
+			hotSpot.scaleX = hotSpot.scaleY = hotSpot.scale = 1.02;		
+			this.parent.addChild(this);
+			this.offset = {x: this.x - evt.stageX, y: this.y - evt.stageY};
+			update = true;   
+		});
+		hotSpot.on("rollout", function (evt) {
+			hotSpot.scaleX = hotSpot.scaleY = hotSpot.scale = 1;
+			update = true;
+		});
+		hotSpot.on("mousedown", function (evt) {
+			rotate = true;
+		});
+		hotSpot.on("pressup", function (evt) {	
+			rotate = false;
+		});
+		hotSpot.on("pressmove", function (evt) {
+			if (evt.stageX > 15
+				&& evt.stageX < 530){
+				this.x = evt.stageX + this.offset.x;
+//			this.y = evt.stageY + this.offset.y;
+			}
+			// indicate that the stage should be updated on the next tick:
+			updateHotSpots(index,this.x,incr);
+			update = true;
+		});
+		hotSpot.name="hotSpot";
+		c.addChild(hotSpot);
+		c.x = xLoc;
+		c.y = yLoc;
+		c.xLoc = xLoc;
+		c.scaleFactor = 0;
+		c.alpha = scale;
+		c.incr = incr;
+		c.scaleX = c.scaleY = c.scale = scale;
+//		c.regX = (xLoc+step*10)/2;
+//		c.regY = yLoc; 
+
+//		c.cursor = "move";
+		
+		c.on("mousedown", function (evt) {
+				return;
+			downTime = new Date().getTime();
+			c.oldX = c.x;
+			c.oldY = c.y;
+			this.parent.addChild(this);
+			this.offset = {x: this.x - evt.stageX, y: this.y - evt.stageY};
+		});
+
+		c.on("pressup", function (evt) {
+			update = true;
+			if (Math.abs(c.oldX - c.x) < 2 && Math.abs(c.oldY - c.y) < 2)
+				return;
+			
+			getOut();
+
+		});
+
+		c.on("pressmove", function (evt) {
+				return;
+			this.x = evt.stageX + this.offset.x;
+			this.y = evt.stageY + this.offset.y;
+			// indicate that the stage should be updated on the next tick:
+			update = true;
+		});
+		stage.addChild(c);
+		return c;
+	}	
+	
+
+	function createStage() {
+		var resetImage = new Image();
+		var trashCanImage = new Image();
+		var bombImage = new Image();
+		trashCanImage.src = "../images/TrashCan.JPG";
+		trashCanImage.onload=handleTrashCanLoad;
+		resetImage.src = "../images/resetButton.png";
+		resetImage.onload = handleResetButtonLoad;
+		bombImage.src = "../images/bombSmall.png";
+		bombImage.onload = handleBombLoad;
+		
+		var graphics = new createjs.Graphics();
+		graphics.setStrokeStyle(1).beginStroke("#D3D3D3").drawRect(280, 15, 60, 100);		
+		graphics.setStrokeStyle(1).beginStroke("#D3D3D3").drawRect(5, 5, 580, 350);
+		graphics.setStrokeStyle(1).beginStroke("#D3D3D3").drawRect(10, 10, 570, 110);
+		graphics.setStrokeStyle(1).beginStroke("#D3D3D3").beginFill("#FFF8DC").drawRect(10, 125, 570, 225);
+        graphics.alpha=0.25;
+        for (var i = 0; i < 15; i++)
+        	graphics.mt(10,140+i*15).lt(580,140+i*15);
+        for (var i = 0; i < 37; i++)
+        	graphics.mt(25+i*15,124).lt(25+i*15,350);
+  		var text = new createjs.Text("Add Zero", "12px Arial", "#000000");
+        text.x = 350;
+        text.y = 65;
+        text.textBaseline = "alphabetic";
+        container.addChild(text);      
+ 
+		var shape = new createjs.Shape(graphics);
+        container.addChild(shape);
+        if (questionText != "") {
+        	var qtext = new createjs.Text("Solve: " + questionText, " 18px Arial", "#0000FF");
+        	qtext.x = 20;
+        	qtext.y = 150;
+        	qtext.textBaseline = "alphabetic";
+        	container.addChild(qtext);
+        }
+	}
+	function handleBombLoad(event) {
+		var image = event.target;
+		var bitmap = new createjs.Bitmap(image);
+		container.addChild(bitmap);
+		var text = new createjs.Text("Clear Marked Chips", "12px Arial", "#000000");
+        text.x = 450;
+        text.y = 100;
+        text.textBaseline = "alphabetic";
+        container.addChild(text);
+		bitmap.regX = bitmap.image.width / 2 | 0;
+		bitmap.regY = bitmap.image.height / 2 | 0;
+		bitmap.scaleX = bitmap.scaleY = bitmap.scale = 1;
+		bitmap.name = "bmp_resetButton";
+		bitmap.cursor = "pointer";
+		this.scaleX = this.scaleY = this.scale;
+
+		bitmap.x = 510;
+		bitmap.y = 50;
+		this.scaleX = this.scaleY = this.scale;
+		bitmap.on("rollover", function (evt) {
+			this.scaleX = this.scaleY = this.scale * 1.2;
+			update = true;
+		});	
+		bitmap.on("click", function(evt) {
+				blowEmUp();
+		});
+	}
+	function handleTrashCanLoad(event) {
+		var image = event.target;
+		var bitmap = new createjs.Bitmap(image);
+		container.addChild(bitmap);
+		bitmap.regX = bitmap.image.width / 2 | 0;
+		bitmap.regY = bitmap.image.height / 2 | 0;
+		bitmap.scaleX = bitmap.scaleY = bitmap.scale = 1;
+		bitmap.name = "bmp_resetButton";
+		bitmap.cursor = "pointer";
+		this.scaleX = this.scaleY = this.scale;
+
+		bitmap.x = 50;
+		bitmap.y = 45;
+		this.scaleX = this.scaleY = this.scale;
+		bitmap.on("rollover", function (evt) {
+			this.scaleX = this.scaleY = this.scale * 1.2;
+			update = true;
+		});	
+
+	}
+	function handleResetButtonLoad(event) {
+	
+		var image = event.target;
+		var bitmap = new createjs.Bitmap(image);
+		container.addChild(bitmap);
+		var text = new createjs.Text("Start Over", "12px Arial", "#000000");
+        text.x = 90;
+        text.y = 95;
+        text.textBaseline = "alphabetic";
+        container.addChild(text);
+		bitmap.regX = bitmap.image.width / 2 | 0;
+		bitmap.regY = bitmap.image.height / 2 | 0;
+		bitmap.scaleX = bitmap.scaleY = bitmap.scale = 1;
+		bitmap.name = "bmp_resetButton";
+		bitmap.cursor = "pointer";
+		this.scaleX = this.scaleY = this.scale;
+		bitmap.x = 120;
+		bitmap.y = 50
+		bitmap.on("click",function (evt) {
+//			for (var i = 0; i < chipCount;i++) {
+			while (chips.length > 0) {
+				deleteRod(chips.pop());
+			}
+			chipCount = 0;
+			currentPosRow = 1;
+			currentPosCol = 1;
+			currentNegRow = 1;
+			currentNegCol = 1;
+			getOut();
+
+		 });
+		bitmap.on("rollover", function (evt) {
+			this.scaleX = this.scaleY = this.scale * 1.2;
+			update = true;
+		});
+
+		bitmap.on("rollout", function (evt) {
+			this.scaleX = this.scaleY = this.scale;
+			update = true;
+		});
+	}
+	function deleteRod(bitmap) {
+		createjs.Tween.get(bitmap)
+		.to({alpha:0, visible:false}, 500);
+	}
+	
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+function getOut() {
+	return;
+	var outtxt = "";
+	var cell = 0;
+	var dir = 0;
+	for (var i = 0; i < chips.length; i++) {
+		if (chips[i].alpha > 0) {
+			dir = (chips[i].rotated ? 1 : 0);
+			cell = chips[i].col + "," + chips[i].row + "," + (chips[i].units-1) + "," + dir;
+			outtxt += ":"+cell;
+		}
+	}
+	if (qn != null) {
+		parent.postMessage(qn+":"+outtxt,'*');
+	}	
+}
+function play_single_sound() {
+		document.getElementById('audiotag1').play();
+}
+
+</script>
+</head>
+<body onload="init();">
+<div>
+<div style="position:relative">
+  <div style="position:absolute;top:0px;left:0px">
+  	<canvas id="testCanvas" width="550" height="800"></canvas>
+  </div>
+</div>
+
+</div>
+<audio id="audiotag1" src="../audio/boomboom.mp3" preload="auto"></audio>
+</body>
+</html>

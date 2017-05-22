@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Pattern BlocksVirtual Manipulative</title>
+
+	<script src="../lib/easeljs-NEXT.combined.js"></script>
+	<script type="text/javascript" src="../lib/tweenjs-NEXT.combined.js"></script>
+
+<script id="editable">
+	var canvas, stage, container;
+	var TILE_WIDTH = 50;
+	var TILE_HEIGHT = 43.3;
+	var X_ORIGIN = 135;
+	var Y_ORIGIN = 10;
+	var STAGE_WIDTH = 500;
+	var STAGE_HEIGHT = 433;
+	var H_TILE_COUNT = 10;
+	var V_TILE_COUNT = 10;
+
+
+    
+	function init() {
+		qn = getParameterByName("qn");
+		initValue = getParameterByName("inVal");
+		if (initValue != null) {
+			// Load Stage with inVal Tiles
+		}
+		// create stage and point it to the canvas:
+		canvas = document.getElementById("testCanvas");
+		stage = new createjs.Stage(canvas);
+
+		// enable touch interactions if supported on the current device:
+		createjs.Touch.enable(stage);
+
+		// enabled mouse over / out events
+		stage.enableMouseOver(10);
+		stage.mouseMoveOutside = true; // keep tracking the mouse even when it leaves the canvas
+
+	    container = new createjs.Container();
+		stage.addChild(container);
+		createStage();
+        createjs.Ticker.setFPS(20);
+        createjs.Ticker.addEventListener("tick", stage);
+//           resize();
+	}
+	
+
+	function stop() {
+		createjs.Ticker.removeEventListener("tick", tick);
+	}
+	
+	function createStage() {
+		var trashCanImage = new Image();
+		trashCanImage.src = "../images/TrashCan.JPG";
+		trashCanImage.onload=handleTrashCanLoad;
+		var resetImage = new Image();
+		resetImage.src = "../images/resetButton.png";
+		resetImage.onload = handleResetButtonLoad;
+		var graphics = new createjs.Graphics();
+		graphics.setStrokeStyle(1).beginStroke("#000000").drawRect(5, 5, 635, 490);
+		graphics.setStrokeStyle(1).beginStroke("#000000").drawRect(10, 10, 120, 480);
+		graphics.setStrokeStyle(1).beginStroke("#000000").beginFill("#FFF8DC");
+		graphics.drawRect(X_ORIGIN, Y_ORIGIN, STAGE_WIDTH, STAGE_HEIGHT);
+        graphics.alpha=0.25;
+        for (var i = 0; i < 6; i++) {
+        	var x = X_ORIGIN+i*TILE_WIDTH;
+        	var y = Y_ORIGIN;
+        	graphics.mt(x,y).lt(x+10*(TILE_WIDTH/2),y + STAGE_HEIGHT);
+        	x = X_ORIGIN + STAGE_WIDTH - i*TILE_WIDTH;
+        	graphics.mt(x,y).lt(x-10*(TILE_WIDTH/2),y + STAGE_HEIGHT);        	
+        }
+        for (var i = 0; i < 4; i++) {
+        	var x = X_ORIGIN;
+        	var y = Y_ORIGIN + (i+1)*TILE_HEIGHT*2;
+        	console.log(x + ":" + y);
+        	graphics.mt(x,y).lt(x+TILE_WIDTH*4-(TILE_WIDTH*i),Y_ORIGIN + STAGE_HEIGHT);
+        	var x = X_ORIGIN + STAGE_WIDTH;
+        	graphics.mt(x,y).lt(x-TILE_WIDTH*4+(TILE_WIDTH*i),Y_ORIGIN + STAGE_HEIGHT);
+        }
+        
+        for (var i = 0; i < 4; i++) {
+        	var x = X_ORIGIN+(i+6)*TILE_WIDTH;
+        	var y = Y_ORIGIN;
+        	graphics.mt(x,y);
+        	graphics.lt(X_ORIGIN + STAGE_WIDTH,
+        		       Y_ORIGIN + STAGE_HEIGHT - (TILE_HEIGHT*2) * (i+1));
+        	var x = X_ORIGIN + (i+1)*TILE_WIDTH;
+        	graphics.mt(x,y);
+        	graphics.lt(X_ORIGIN,
+        		       Y_ORIGIN + (TILE_HEIGHT*2) * (i+1));
+        	
+        }
+		var shape = new createjs.Shape(graphics);
+        container.addChild(shape);
+        createTransparentHotSpot(300,480);
+        createTransparentHotSpotText(150,485);
+	}
+	
+	function handleTrashCanLoad(event) {
+		var image = event.target;
+		var bitmap = new createjs.Bitmap(image);
+		container.addChild(bitmap);
+		bitmap.regX = bitmap.image.width / 2 | 0;
+		bitmap.regY = bitmap.image.height / 2 | 0;
+		bitmap.scaleX = bitmap.scaleY = bitmap.scale = 1;
+		bitmap.name = "bmp_resetButton";
+		bitmap.cursor = "pointer";
+		this.scaleX = this.scaleY = this.scale;
+
+		bitmap.x = 50;
+		bitmap.y = 130;
+		this.scaleX = this.scaleY = this.scale;
+		bitmap.on("rollover", function (evt) {
+			this.scaleX = this.scaleY = this.scale * 1.2;
+			update = true;
+		});
+
+		bitmap.on("rollout", function (evt) {
+			this.scaleX = this.scaleY = this.scale;
+			update = true;
+		});
+		bitmap.on("click", function (evt) {
+
+		});
+	}
+	function handleResetButtonLoad(event) {
+	
+		var image = event.target;
+		var bitmap = new createjs.Bitmap(image);
+		container.addChild(bitmap);
+		var text = new createjs.Text("Start Over", "12px Arial", "#000000");
+        text.x = 20;
+        text.y = 90;
+        text.textBaseline = "alphabetic";
+        container.addChild(text);
+		bitmap.regX = bitmap.image.width / 2 | 0;
+		bitmap.regY = bitmap.image.height / 2 | 0;
+		bitmap.scaleX = bitmap.scaleY = bitmap.scale = 1;
+		bitmap.name = "bmp_resetButton";
+		bitmap.cursor = "pointer";
+		this.scaleX = this.scaleY = this.scale;
+		bitmap.x = 50;
+		bitmap.y = 50
+		bitmap.on("click",function (evt) {
+			resetStage();
+		});
+		bitmap.on("rollover", function (evt) {
+			this.scaleX = this.scaleY = this.scale * 1.2;
+			update = true;
+		});
+
+		bitmap.on("rollout", function (evt) {
+			this.scaleX = this.scaleY = this.scale;
+			update = true;
+		});
+	}
+	function deleteTile(bitmap) {
+		createjs.Tween.get(bitmap)
+		.to({alpha:0, visible:false}, 500);
+	}
+	
+
+	function tick(event) {
+		// this set makes it so the stage only re-renders when an event handler indicates a change has happened.
+		if (update) {
+			update = false; // only update once
+			stage.update(event);
+		}
+	}
+	
+
+	function resetStage() {}
+
+
+	function createTransparentHotSpotText(xloc,yloc,label) {
+		var hsText = new createjs.Text("Add Transparent Pieces", "12px Arial", "#000000");
+        hsText.x = xloc;
+        hsText.y = yloc;
+        hsText.textBaseline = "alphabetic";
+        stage.addChild(hsText);
+    }
+	
+	function createTransparentHotSpot(xloc,yloc) {
+		var hs = new createjs.Shape();
+		var radius = 10;
+		hs.graphics.beginFill("#0000FF").setStrokeStyle(2);
+		hs.graphics.drawCircle(xloc-radius+10, yloc-radius+10, 10).endFill();	
+		hs.regX = 1.5;
+		hs.regY = -1.5;
+		hs.selected = false;
+		hs.alpha = .2;
+		hs.scaleX = hs.scaleY = hs.scale;
+		hs.on("rollover", function (evt) {
+			this.scaleX = this.scaleY = this.scale * 1.2;
+			update = true;   
+		});
+		hs.on("rollout", function (evt) {
+			this.scaleX = this.scaleY = this.scale;
+			update = true;
+		});
+		hs.on("click", function (evt) {
+			if (currentAlpha == .2) {
+				currentAlpha = 1;
+				this.alpha = .2;
+			} else {
+				currentAlpha = .2;
+				this.alpha = 1;
+			}				
+		});		
+		stage.addChild(hs);
+	}
+	function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+function getOut() {
+	var outtxt = num100*100+num10*10+num1; 
+	if (qn != null) {
+		parent.postMessage(qn+"::"+outtxt,'*');
+//		alert(qn+"::"+outtxt);
+	}	
+}
+</script>
+</head>
+<body onload="init();">
+<div style="position:relative">
+  <div style="position:absolute;top:0px;left:0px">
+    <canvas id="testCanvas" width="700px" height="500px"></canvas>
+  </div>
+</div>
+</body>
+</html>

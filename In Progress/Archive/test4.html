@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Fraction Pieces Virtual Manipulative</title>
+
+	<script src="../lib/easeljs-NEXT.combined.js"></script>
+	<script type="text/javascript" src="../lib/tweenjs-NEXT.combined.js"></script>
+
+<script id="editable">
+	var canvas, stage, container;
+	var currentAlpha = 1;
+    
+	function init() {
+
+		// create stage and point it to the canvas:
+		canvas = document.getElementById("testCanvas");
+		stage = new createjs.Stage(canvas);
+
+		// enable touch interactions if supported on the current device:
+		createjs.Touch.enable(stage);
+
+		// enabled mouse over / out events
+		stage.enableMouseOver(10);
+		stage.mouseMoveOutside = true; // keep tracking the mouse even when it leaves the canvas
+
+	    container = new createjs.Container();
+		stage.addChild(container);
+ 
+		createStage();
+        createjs.Ticker.setFPS(20);
+        createjs.Ticker.addEventListener("tick", stage);
+	}
+
+
+	function createStage() {
+	
+		var s = new createjs.Shape();
+		s.graphics.setStrokeStyle(1).beginStroke("#D3D3D3").drawRect(5, 5, 595, 470);
+		s.graphics.setStrokeStyle(1).beginStroke("#D3D3D3").drawRect(10, 10, 250, 460);
+		s.graphics.setStrokeStyle(1).beginStroke("#D3D3D3").beginFill("#FFF8DC").drawRect(265, 10, 330, 460);
+        s.graphics.alpha=0.25;
+        for (var i = 0; i < 30; i++)
+        	s.graphics.mt(265,25+i*15).lt(595,25+i*15);
+        for (var i = 0; i < 21; i++)
+        	s.graphics.mt(280+i*15,10).lt(280+i*15,470);
+        
+        container.addChild(s);
+        createTransparentHotSpot(160,455);
+        createTransparentHotSpotText(15,460);
+	}
+
+	function tick(event) {
+		// this set makes it so the stage only re-renders when an event handler indicates a change has happened.
+		if (update) {
+			update = false; // only update once
+			stage.update(event);
+		}
+	}
+	
+
+	function createTransparentHotSpotText(xloc,yloc,label) {
+		var hsText = new createjs.Text("Add Transparent Pieces", "12px Arial", "#000000");
+        hsText.x = xloc;
+        hsText.y = yloc;
+        hsText.textBaseline = "alphabetic";
+        stage.addChild(hsText);
+    }
+	
+	function createTransparentHotSpot(xloc,yloc) {
+		var hscontainer = new createjs.Container();
+		hscontainer.visible = true;
+		hscontainer.x = xloc;
+		hscontainer.y = yloc;
+		var hs = new createjs.Shape();
+		hs.graphics.beginFill("#0000FF").setStrokeStyle(2);
+		hs.graphics.drawCircle(5, 5, 10).endFill();	
+		hs.regX = 1.5;
+		hs.regY = -1.5;
+		hs.selected = false;
+		hs.alpha = .2;
+		hs.scaleX = hs.scaleY = hs.scale = 1;
+		hs.on("rollover", function (evt) {
+			this.scaleX = this.scaleY = this.scale * 1.2;
+			update = true;   
+		});
+		hs.on("rollout", function (evt) {
+			this.scaleX = this.scaleY = this.scale;
+			update = true;
+		});
+		hs.on("click", function (evt) {
+				console.log("click");
+			if (currentAlpha == .2) {
+				currentAlpha = 1;
+				this.alpha = .2;
+			} else {
+				currentAlpha = .2;
+				this.alpha = 1;
+			}				
+		});		
+		hscontainer.addChild(hs);
+		stage.addChild(hscontainer);
+	}
+	
+
+</script>
+</head>
+<body onload="init();">
+<div style="position:relative">
+  <div style="position:absolute;top:0px;left:0px">
+    <canvas id="testCanvas" width="600px" height="500px"></canvas>
+  </div>
+ 
+</div>
+</body>
+</html>

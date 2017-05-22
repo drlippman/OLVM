@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+var toff;
+var hloc = null;
+var N = 0;
+var border=20;
+var snap = true;
+var MAX=6;
+function redrawPic(isactive) {
+	var canvas = $("#thecanvas");
+	var w = canvas.attr("width");
+	var h = canvas.attr("height");
+	var ctx = canvas[0].getContext("2d");
+	ctx.fillStyle = "#FFFFFF";
+	ctx.fillRect(0,0,w,h);
+	toff = 10;
+	
+	//spacing
+	dx = (w-2*border)/(scale);
+	
+	//draw main numberline
+	ctx.strokeStyle = '#000000';
+	ctx.lineWidth = 3;
+	ctx.beginPath();
+	ctx.fillStyle = "#0000FF";
+	if (N > 0) {
+		ctx.fillRect(border,0,N*dx,h-10);
+	}
+	ctx.lineWidth = 3;
+	ctx.rect(border,0,w-2*border,h-10);
+    for (var i = 1; i < scale; i++) {
+    	ctx.moveTo(border+i*dx,0);
+    	ctx.lineTo(border+i*dx,49);
+    }	
+	ctx.stroke();
+	ctx.fillStyle = '#000000';
+	ctx.textAlign = 'center';
+	ctx.textBaseline = 'top';
+	ctx.font = '16px sans-serif';
+
+    // Draw Divisions
+//    ctx.beginPath();
+
+    // Draw labels
+ /*   ctx.stroke();
+		ctx.fillText(0,border,25+toff);
+		ctx.fillText(1,border+scale*dx,25+toff);
+		ctx.fillText(2,border+scale*2*dx,25+toff);
+*/	
+//	if (hloc==null) {
+//		hloc=border+scale*2*dx;
+
+//	}
+    hloc = border+dx*N;	
+	//draw active line
+	ctx.beginPath();
+	ctx.lineWidth = 1;
+	if (isactive) {
+		ctx.fillStyle = 'rgba(255,255,0,0.5)';
+	} else {
+		ctx.fillStyle = 'rgba(0,255,0,0.5)';
+	}
+	ctx.arc(hloc,h-10,7, 0, 2*Math.PI, false);
+	ctx.fill();
+	ctx.stroke();
+	sendit();
+}
+
+$(function() {redrawPic();});
+
+var istouch = false;
+function ontouchstart(evt) {
+	if (!istouch) {
+		$("#canvaswrapper").off("mousedown", onmousedown);
+		$("#canvaswrapper").off("mousemove", onmousemove);
+	}
+	istouch = true;
+	var touch = evt.originalEvent.changedTouches[0] || evt.originalEvent.touches[0];
+	evt.pageX = touch.pageX;
+	evt.pageY = touch.pageY;
+	onmousedown(evt, $(this));
+}
+
+function ontouchmove(evt) {
+	var touch = evt.originalEvent.changedTouches[0] || evt.originalEvent.touches[0];
+	evt.pageX = touch.pageX;
+	evt.pageY = touch.pageY;
+	onmousemove(evt);
+}
+
+var mouseisdown = false;
+function onmousedown(e) {
+	if (isInDragTarget(e)) {
+		 mouseisdown = true;
+		 e.preventDefault();
+		 return false;
+	}
+}
+function onmouseup(e) {
+	mouseisdown = false;
+	isintarget = false;
+	$("body").css("cursor","");
+	redrawPic();
+}
+var isintarget = false;
+function onmousemove(e) {
+	var newN;
+	if (mouseisdown) {
+		var wpos = $("#thecanvas").offset();
+		var xpos = e.pageX - wpos.left;
+		var bits = (xpos - border)/dx;
+		var pixoff = (Math.abs(bits - Math.round(bits))*dx);
+		if (pixoff < 8) {
+			newN = Math.round(bits);
+			if (newN <= scale && newN >= 0){
+				N = newN
+				hloc = border+dx*N;
+			}
+			redrawPic(true);
+		} else if (!snap) {
+			N = bits;
+			hloc = border+dx*N;
+			redrawPic(true);
+		}
+		e.preventDefault();
+		return false;
+	} else {
+		if (isInDragTarget(e)) {
+			if (!isintarget) {
+				$("body").css("cursor","ew-resize");
+				isintarget = true;
+				redrawPic(true);
+			}
+		} else if (isintarget) {
+			isintarget = false;
+			$("body").css("cursor","");
+			redrawPic();
+		}
+	}
+	
+}
+
+
+function isInDragTarget(e) {
+	var wpos = $("#thecanvas").offset();
+	var xpos = e.pageX - wpos.left;
+	var ypos = e.pageY - wpos.top;
+	//var xpos = e.offsetX === undefined ? e.originalEvent.layerX : e.offsetX;
+	//var ypos = e.offsetY === undefined ? e.originalEvent.layerY : e.offsetY;
+//	return (distsqr(xpos,ypos,hloc,10+toff)< (istouch?100:50));
+	return (distsqr(xpos,ypos,hloc,40+toff)< (istouch?100:50));
+}
+function distsqr(x1,y1,x2,y2) {
+	return ((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+}
+
+$(function() {
+	$("#canvaswrapper").on("mousedown", onmousedown).on("touchstart", ontouchstart);
+	$("body").on("mouseup touchend", onmouseup);
+	$("#canvaswrapper").on("mousemove", onmousemove).on("touchmove", ontouchmove);
+});
+
+
+
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+var qn;
+$(function() {
+ 	qn = getParameterByName("qn");
+ 	if (qn != "") {
+ 		var prevscale = getParameterByName("scale");
+ 		if (prevscale != "") {
+ 		  scale = Number(prevscale);
+ 		  $('#scale').val(scale);
+ 		}
+ 		var prevval = getParameterByName("val");
+ 		if (prevval != "") {
+ 		  val = Number(prevval);
+ 		}
+  		if (getParameterByName("snap")=="false") {
+  			snap = false;
+  			N = val;
+  		} else {
+  			N = Math.round(val);
+  		}
+ 		hloc=null;
+ 		redrawPic();
+ 	}
+})
+
+function sendit(){
+	var val = N;
+	var returnstring = qn + "::" + scale + "," + val;
+	parent.postMessage(returnstring,"*");
+}
+var scale=1;
+function setScale(newscale){
+   scale = newscale.value;
+   N = 0;
+   redrawPic();
+}
+function upScale(){
+	if (scale < MAX) {
+		scale++;
+		redrawPic();
+		document.getElementById("lessParts").disabled = false;
+	}
+	if (scale == MAX) {
+		document.getElementById("moreParts").disabled = true;
+	}
+}
+
+function downScale(){
+	if (scale > 1) {
+		scale--;
+		if (N > scale)
+			N = scale;
+		redrawPic();
+		document.getElementById("moreParts").disabled = false;
+	}
+	if (scale == 0) {
+		document.getElementById("lessParts").disabled = true;
+	}
+}
+</script>
+
+<style type="text/css">
+head, body, div {
+	margin: 0; padding: 0;
+}
+body { 
+	padding: 10px;
+	font-family: san-serif;
+	background-color: #fff;
+}
+</style>
+
+</head>
+<body>
+<div id="canvaswrapper" style="position:relative;">
+<canvas width="400" height="60" id="thecanvas" style="position:relative;">
+Your browser does not support Canvas. Please use a modern browser.
+</canvas>
+<div id="controls">
+    Partitions <button type="button" id="moreParts" onclick="upScale()"><b>+</b></button>
+               <button type="button" id="lessParts"   onclick="downScale()"><b>-</b></button>
+    </div>
+</div>
+</body>
+</html>

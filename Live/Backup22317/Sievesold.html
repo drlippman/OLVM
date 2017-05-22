@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Fraction Pieces Virtual Manipulative</title>
+
+	<script src="../lib/easeljs-NEXT.combined.js"></script>
+	<script type="text/javascript" src="../lib/tweenjs-NEXT.combined.js"></script>
+
+<script id="editable">
+	var canvas, stage, container;
+	var tiles = [];
+	var tileCount =144;
+	var selectingTiles = 0;
+
+
+
+    
+	function init() {
+		qn = getParameterByName("qn");
+		initValue = getParameterByName("inVal");
+		if (initValue != null) {
+				in100 = Math.floor(initValue/100);
+				in10 = Math.floor(initValue%100/10);
+				in1 = initValue%10;
+		}
+		// create stage and point it to the canvas:
+		canvas = document.getElementById("testCanvas");
+		stage = new createjs.Stage(canvas);
+
+		// enable touch interactions if supported on the current device:
+		createjs.Touch.enable(stage);
+
+		// enabled mouse over / out events
+		stage.enableMouseOver(10);
+		stage.mouseMoveOutside = true; // keep tracking the mouse even when it leaves the canvas
+
+	    container = new createjs.Container();
+		stage.addChild(container);
+
+ 
+		createStage();
+		var tileXloc = 30;
+		var tileYloc = 30;
+		for (var i = 0; i < 144; i++) {
+			stage.addChild(drawTile(tileXloc,tileYloc,i+2));
+			tileXloc+= 30;
+			if (tileXloc == 210)
+				tileXloc = 30;
+			if (tileXloc == 30)
+				tileYloc += 30;
+		}
+
+
+            createjs.Ticker.setFPS(50);
+            createjs.Ticker.addEventListener("tick", stage);
+	}
+	
+
+	function stop() {
+		createjs.Ticker.removeEventListener("tick", tick);
+	}
+	
+
+
+	function drawTile(xloc,yloc,value) {		
+		var tC = new createjs.Container();
+		var tile = new createjs.Shape();
+		tile.selected = false;
+		tile.graphics.beginFill("CYAN");
+		tile.graphics.setStrokeStyle(1).beginStroke("#000000").drawRect(xloc, yloc, 30, 30);
+		tile.alpha = .1;
+
+/*		tile.on("click", function (evt) {
+			if (tile.selected == false) {
+				tile.selected = true;
+				tile.alpha = 1;
+			} else {
+				tile.selected = false;
+				tile.alpha = .1;
+			}
+
+		});
+*/		tile.on("rollover", function (evt) {
+				    update = true;
+
+			if (selectingTiles == 1) {
+				tile.alpha = 1;
+				tile.selected = true;
+			}
+			if (selectingTiles == 2) {
+				tile.alpha = .1;
+				tile.selected = false;
+			}
+		});
+
+		tile.on("mousedown", function (evt) {
+			if (tile.selected == true) {
+		       selectingTiles = 2;
+		       tile.selected = false;
+		       tile.alpha = .1;
+		    } else {
+		    	tile.selected = true;
+		    	tile.alpha = 1;
+		        selectingTiles = 1;
+		    }
+		    update = true;
+		});	
+		tile.on("pressup", function (evt) {
+						    update = true;
+
+		    selectingTiles = 0;
+		});	
+		
+		tC.addChild(tile);
+		var text = new createjs.Text(value, "12px Arial", "#000000");
+		text.textAlign="center";
+		text.mouseEnabled = false;
+        text.x = xloc+15;
+        
+        text.y = yloc+20;
+        text.textBaseline = "alphabetic";
+        text.on("rollover", function (evt) {
+        				    update = true;
+        				    console.log("font");
+        	this.font = "bold 36px Arial";
+this.scaleX = this.scaleY = 2;
+			
+//			text.scale = 1.1;
+
+		});
+		text.on("rollout", function (evt) {
+						    update = true;
+this.scaleX = this.scaleY = 1;
+			
+//			text.scale = 1;
+		});	
+        tC.addChild(text);
+        return tC;
+/*		hotSpot.graphics.drawCircle(-radius/2, radius/2, 4).endFill();	
+		hotSpot.regX = 1.5;
+		hotSpot.regY = -1.5
+		hotSpot.alpha = .2;
+		hotSpot.scaleX = hotSpot.scaleY = hotSpot.scale = 1;		
+		hotSpot.on("rollover", function (evt) {
+			this.alpha = 1;
+			hotSpot.scaleX = hotSpot.scaleY = hotSpot.scale = 1.02;		
+			this.offset = {x: this.x - evt.stageX, y: this.y - evt.stageY};
+			update = true;   
+		});
+		hotSpot.on("rollout", function (evt) {
+			if (!rotate)
+				this.alpha = .2;
+			hotSpot.scaleX = hotSpot.scaleY = hotSpot.scale = 1;
+			update = true;
+		});
+		hotSpot.on("mousedown", function (evt) {
+			rotate = true;
+		});
+		hotSpot.on("pressup", function (evt) {	
+			this.alpha = .2;
+			rotate = false;
+		});
+
+		dragger.on("rollover", function (evt) {
+
+		});
+		dragger.on("mousedown", function (evt) {
+
+		});
+		dragger.on("rollout", function (evt) {
+
+		});			
+		dragger.on("pressmove",function(evt) {
+
+		});
+		dragger.on("pressup", function (evt) {	
+		});
+		dragger.on("click", function (evt) {
+
+		});
+		
+		return tile;*/
+	}
+ 
+
+	function createStage() {
+
+		var graphics = new createjs.Graphics();
+		graphics.setStrokeStyle(1).beginStroke("#D3D3D3").drawRect(5, 5, 270, 770);
+		graphics.setStrokeStyle(1).beginStroke("#D3D3D3").drawRect(10, 10, 260, 760);
+/*		graphics.setStrokeStyle(1).beginStroke("#D3D3D3").beginFill("#FFF8DC").drawRect(265, 10, 330, 460);
+        graphics.alpha=0.25;
+        for (var i = 0; i < 30; i++)
+        	graphics.mt(265,25+i*15).lt(595,25+i*15);
+        for (var i = 0; i < 21; i++)
+        	graphics.mt(280+i*15,10).lt(280+i*15,470);
+  */      
+		var shape = new createjs.Shape(graphics);
+        container.addChild(shape);
+	}
+	
+
+	
+
+	function tick(event) {
+		// this set makes it so the stage only re-renders when an event handler indicates a change has happened.
+		if (update) {
+			update = false; // only update once
+			stage.update(event);
+		}
+	}
+	
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+function getOut() {
+	var outtxt = num100*100+num10*10+num1; 
+	if (qn != null) {
+		parent.postMessage(qn+"::"+outtxt,'*');
+//		alert(qn+"::"+outtxt);
+	}	
+}
+
+</script>
+</head>
+<body onload="init();">
+<div style="position:relative">
+  <div style="position:absolute;top:0px;left:0px">
+    <canvas id="testCanvas" width="600px" height="800px"></canvas>
+  </div>
+</div>
+</body>
+</html>
