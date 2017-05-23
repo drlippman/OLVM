@@ -32,13 +32,13 @@
 	var snapToGrid = true;
 	var tweensOnTheRun = 0;
 	var score = 1;
-	
+
 	function init() {
 		if (getParameterByName("state") != null) {
-			//var inParams = JSON.parse(atob(getParameterByName("state")));
-			var inParams = { state: JSON.parse(atob("eyJjaGlwcGllcyI6W3sieCI6MTgwLCJ5IjoyMDUsImFscGhhIjoxLCJ2YWwiOjF9LHsieCI6OTAsInkiOjI5NSwiYWxwaGEiOjEsInZhbCI6LTF9LHsieCI6MjI1LCJ5IjoyMDUsImFscGhhIjoxLCJ2YWwiOjF9LHsieCI6MjcwLCJ5IjoyMDUsImFscGhhIjoxLCJ2YWwiOjF9LHsieCI6MTM1LCJ5IjoyOTUsImFscGhhIjoxLCJ2YWwiOi0xfV0sImNoaXBDb3VudCI6NSwiY3VycmVudFBvc0NvbCI6MzE1LCJjdXJyZW50TmVnQ29sIjoxODAsImN1cnJlbnRQb3NSb3ciOjIwNSwiY3VycmVudE5lZ1JvdyI6Mjk1fQ=="))};
+			var inParams = JSON.parse(atob(getParameterByName("state")));
+			//var inParams = { state: JSON.parse(atob("eyJjaGlwcGllcyI6W3sieCI6MTgwLCJ5IjoyMDUsImFscGhhIjoxLCJ2YWwiOjF9LHsieCI6OTAsInkiOjI5NSwiYWxwaGEiOjEsInZhbCI6LTF9LHsieCI6MjI1LCJ5IjoyMDUsImFscGhhIjoxLCJ2YWwiOjF9LHsieCI6MjcwLCJ5IjoyMDUsImFscGhhIjoxLCJ2YWwiOjF9LHsieCI6MTM1LCJ5IjoyOTUsImFscGhhIjoxLCJ2YWwiOi0xfV0sImNoaXBDb3VudCI6NSwiY3VycmVudFBvc0NvbCI6MzE1LCJjdXJyZW50TmVnQ29sIjoxODAsImN1cnJlbnRQb3NSb3ciOjIwNSwiY3VycmVudE5lZ1JvdyI6Mjk1fQ=="))};
 			console.log(inParams);
-			if (inParams.state != "")  {
+			if (typeof inParams.state != "undefined" && inParams.state != "")  {
 				savedChips = inParams.state.chippies;
 				chipCount = inParams.state.chipCount;
 				currentPosCol = inParams.state.currentPosCol;
@@ -53,9 +53,9 @@
 				op = inParams.op;
 				console.log(num1 +"::"+num2+"::"+op);
 			}
-			if (inParams.qn != "") {
-			  console.log(qn);
+			if (typeof inParams.qn != "undefined") {
 			  qn = inParams.qn;
+				console.log("qn:"+qn);
 			}
 		}
 		resize();
@@ -77,7 +77,7 @@
 			"images": ["../images/b.png"],
 			"frames": {width:66.66666, height:66.66666},
 			"animations": {
-				"blammo":{ 
+				"blammo":{
 					frames:[0,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36],
 					next: false
 				}
@@ -104,7 +104,7 @@
 		createjs.Ticker.setFPS(20);
 		createjs.Ticker.addEventListener("tick", stage);
 	}
-	
+
 	function resize() {
 			var canvas = document.querySelector('canvas');
 			var ctx = canvas.getContext('2d');
@@ -113,12 +113,12 @@
 		// regardless of the resolution
 		console.log("resizing");
 		var height = window.innerHeight*.95;
-		
+
 		// So we need to calculate the proper scaled width
 		// that should work well with every resolution
 		var ratio = canvas.width/canvas.height;
 		var width = height * ratio;
-		
+
 		canvas.style.width = width+'px';
 		canvas.style.height = height+'px';
 	}
@@ -126,7 +126,7 @@
 	function stop() {
 		createjs.Ticker.removeEventListener("tick", tick);
 	}
-	
+
 	function clearSelected() {
 		console.log("container click");
 		for (var i = 0; i < chips.length; i++)
@@ -135,7 +135,7 @@
 	function drawSavedChip(chip) {
 		var color = "RED";
 		if (chip.val == 1)
-			color = "YELLOW";		
+			color = "YELLOW";
 		var c = new createjs.Container();
 		var bg = new createjs.Shape();
 		var pt = RADIUS/2;
@@ -145,19 +145,19 @@
 		if (chip.val == 1)
 			bg.graphics.mt(pt,pt-(RADIUS-5)).lt(pt,pt+(RADIUS-5));
 //		bg.alpha = 0.5;
-		c.addChild(bg);	
+		c.addChild(bg);
 		c.x = chip.x;
 		c.y = chip.y;
 		c.index = chip.index;
 		c.val = chip.val;
 		c.alpha = chip.alpha;
 		c.regX = RADIUS/2;
-		c.regY = RADIUS/2; 
+		c.regY = RADIUS/2;
 		c.onTheMove = false;
 		c.greenMile = false;
 
 		c.cursor = "move";
-		
+
 		c.on("mousedown", function (evt) {
 			if (c.onTheMove)
 				return;
@@ -194,7 +194,7 @@
 			update = true;
 			if (Math.abs(c.oldX - c.x) < 2 && Math.abs(c.oldY - c.y) < 2)
 				return;
-			
+
 			if (c.x < 10 || c.x  > 580 || c.y < 100 || c.y > 350) {
 				if (c.index != -1) {
 //					chips.splice(c.index,1);
@@ -203,7 +203,7 @@
 				else {
 					tweensOnTheRun++;
 					c.onTheMove = true;
-					createjs.Tween.get(c, {loop: false}, null, false) 
+					createjs.Tween.get(c, {loop: false}, null, false)
 					.to({x: xloc, y: yloc}, 1000, createjs.Ease.get(1))
 					.call(handleTweenComplete);
 				}
@@ -218,7 +218,7 @@
 				} else {
 					currentNegRow = c.y;
 					currentNegCol = c.x + 45;
-				}				
+				}
 			}
 		});
 		c.on("pressmove", function (evt) {
@@ -242,25 +242,25 @@
 		if (val == 1)
 			bg.graphics.mt(pt,pt-(RADIUS-5)).lt(pt,pt+(RADIUS-5));
 //		bg.alpha = 0.5;
-		c.addChild(bg);	
+		c.addChild(bg);
 		c.x = xloc;
 		c.y = yloc;
 		c.index = -1;
 		c.val = val;
 		c.alpha = 1;
 		c.regX = RADIUS/2;
-		c.regY = RADIUS/2; 
+		c.regY = RADIUS/2;
 		c.onTheMove = false;
 		c.greenMile = false;
 
 		if (yloc >= 100) {
 			c.index = chipCount;
 			chipCount++;
-			chips.push(c);		
+			chips.push(c);
 		} else
 			c.index = -1;
 		c.cursor = "move";
-		
+
 		c.on("mousedown", function (evt) {
 			if (c.onTheMove)
 				return;
@@ -317,8 +317,8 @@
 				chipCount++;
 				chips.push(c);
 				stage.addChild(drawChip(xloc,yloc,color,val));
-			}  
- 			getOut();	
+			}
+ 			getOut();
 		});
 		c.on("pressup", function (evt) {
 			if (c.onTheMove)
@@ -326,7 +326,7 @@
 			update = true;
 			if (Math.abs(c.oldX - c.x) < 2 && Math.abs(c.oldY - c.y) < 2)
 				return;
-			
+
 			if (c.x < 10 || c.x  > 580 || c.y < 100 || c.y > 350) {
 				if (c.index != -1) {
 //					chips.splice(c.index,1);
@@ -335,7 +335,7 @@
 				else {
 					tweensOnTheRun++;
 					c.onTheMove = true;
-					createjs.Tween.get(c, {loop: false}, null, false) 
+					createjs.Tween.get(c, {loop: false}, null, false)
 					.to({x: xloc, y: yloc}, 1000, createjs.Ease.get(1))
 					.call(handleTweenComplete);
 				}
@@ -350,12 +350,12 @@
 				} else {
 					currentNegRow = c.y;
 					currentNegCol = c.x + 45;
-				}				
+				}
 
 				if (c.index == -1) {
 					c.alpha = currentAlpha;
 					c.index = chipCount;
-	
+
 					chipCount++;
 					chips.push(c);
 					stage.addChild(drawChip(xloc,yloc,color,val));
@@ -377,8 +377,8 @@
 			update = true;
 		});
 		return c;
-	}	
-	
+	}
+
 	function kill() {
 		for (var i = 0; i < chips.length-1; i++) {
 			if (!chips[i].onTheMove) {
@@ -415,12 +415,12 @@
 		bg.graphics.mt(30-(RADIUS-5),35).lt(30+(RADIUS-5),35);
 		bg.graphics.mt(30,35-(RADIUS-5)).lt(30,35+(RADIUS-5));
 		bg.alpha = 0.75;
-		c.addChild(bg);	
+		c.addChild(bg);
 		c.x = 290;
 		c.y = 30;
 		c.index = -1;
 		c.regX = RADIUS/2;
-		c.regY = RADIUS; 
+		c.regY = RADIUS;
 		c.cursor = "move";
 
 		c.on("mousedown", function (evt) {
@@ -435,15 +435,15 @@
 			this.y = evt.stageY + this.offset.y;
 			// indicate that the stage should be updated on the next tick:
 			update = true;
-		});	
+		});
 		c.on("pressup", function (evt) {
 			update = true;
 			if (Math.abs(c.oldX - c.x) < 2 && Math.abs(c.oldY - c.y) < 2)
 				return;
-			
+
 			if (c.x < 10 || c.x  > 580 || c.y < 100 || c.y > 300) {
-					createjs.Tween.get(c, {loop: false}, null, false) 
-					.to({x: 290, y: 30}, 1000, createjs.Ease.get(1)) 
+					createjs.Tween.get(c, {loop: false}, null, false)
+					.to({x: 290, y: 30}, 1000, createjs.Ease.get(1))
 			} else {
 				var newX,newY;
 				if (snapToGrid) {
@@ -495,8 +495,8 @@
 				chip2.index = chipCount;
 				chipCount++;
 				chips.push(chip2);
-			}    			
-			getOut();	
+			}
+			getOut();
 		});
 */
 		stage.addChild(c);
@@ -535,12 +535,12 @@
 				.to({x: newX, y: newYellowY,alpha:currentAlpha}, 1000, createjs.Ease.get(1))
 				.call(handleTweenComplete);
 		redChip.onTheMove = true;
-		createjs.Tween.get(redChip, {loop: false}, null, false) 
+		createjs.Tween.get(redChip, {loop: false}, null, false)
 				.to({x: newX, y: newRedY,alpha:currentAlpha}, 1000, createjs.Ease.get(1))
-				.call(handleTweenComplete);	
+				.call(handleTweenComplete);
 	}
 	function blowEmUp() {
-	
+
 		for (var i = 0; i < chipCount;) {
 			if (chips[i].alpha == .25) {
 				var blammoClone = blammo.clone();
@@ -560,8 +560,8 @@
 //		play_single_sound();
 		setTimeout(clearBlammos, 3000);
 	}
-	
-	function blowUpStacked() {	
+
+	function blowUpStacked() {
 		for (var i = 0; i < chipCount;) {
 			if (chips[i].greenMile == true) {
 				var blammoClone = blammo.clone();
@@ -582,18 +582,18 @@
 //		play_single_sound();
 		setTimeout(clearBlammos, 3000);
 	}
-	
+
 	function clearBlammos() {
 		while (blammos.length > 0) {
 			stage.removeChild(blammos.pop());
 		}
 	}
-	
+
 	function hitTest(chip1,chip2) {
 		var distance = Math.sqrt(Math.pow(chip1.x-chip2.x,2)+Math.pow(chip1.y-chip2.y,2));
 		return (distance < RADIUS*2);
 	}
-	
+
 	function createStage() {
 		var resetImage = new Image();
 		var oppositeImage = new Image();
@@ -604,9 +604,9 @@
 		resetImage.onload = handleResetButtonLoad;
 		bombImage.src = "../images/bombSmall.png";
 		bombImage.onload = handleBombLoad;
-		
+
 		var graphics = new createjs.Graphics();
-		graphics.setStrokeStyle(1).beginStroke("#D3D3D3").drawRect(280, 15, 60, 100);		
+		graphics.setStrokeStyle(1).beginStroke("#D3D3D3").drawRect(280, 15, 60, 100);
 		graphics.setStrokeStyle(1).beginStroke("#D3D3D3").drawRect(5, 5, 580, 420);
 		graphics.setStrokeStyle(1).beginStroke("#D3D3D3").drawRect(10, 10, 570, 110);
 		graphics.setStrokeStyle(1).beginStroke("#D3D3D3").beginFill("#FFF8DC").drawRect(10, 125, 570, 255);
@@ -619,8 +619,8 @@
         text.x = 350;
         text.y = 65;
         text.textBaseline = "alphabetic";
-        stage.addChild(text);      
- 
+        stage.addChild(text);
+
 		var shape = new createjs.Shape(graphics);
         container.addChild(shape);
         if (questionText != "") {
@@ -655,7 +655,7 @@
 		bitmap.on("rollover", function (evt) {
 			this.scaleX = this.scaleY = this.scale * 1.2;
 			update = true;
-		});	
+		});
 		bitmap.on("click", function(evt) {
 				blowEmUp();
 		});
@@ -702,7 +702,7 @@
 			for (var i = 0; i < chips.length; i++){
 				if ((flipSelected && chips[i].alpha == .25) || !flipSelected) {
 					chips[i].val *= -1;
-					if (chips[i].val == 1) 
+					if (chips[i].val == 1)
 						color = "YELLOW";
 					else
 						color = "RED";
@@ -719,7 +719,7 @@
 
 	}
 	function handleResetButtonLoad(event) {
-	
+
 		var image = event.target;
 		var bitmap = new createjs.Bitmap(image);
 		stage.addChild(bitmap);
@@ -764,7 +764,7 @@
         hsText.textBaseline = "alphabetic";
         stage.addChild(hsText);
     }
-	
+
 	function createSnapToGridHotSpot(xloc,yloc) {
 		var hs = new createjs.Shape();
 		var radius = 10;
@@ -779,7 +779,7 @@
 		hs.scaleX = hs.scaleY = hs.scale = 1;
 		hs.on("rollover", function (evt) {
 			this.scaleX = this.scaleY = this.scale * 1.2;
-			update = true;   
+			update = true;
 		});
 		hs.on("rollout", function (evt) {
 			this.scaleX = this.scaleY = this.scale;
@@ -792,11 +792,11 @@
 			} else {
 				snapToGrid = true;
 				hs.alpha = 1;
-			}				
-		});		
+			}
+		});
 		stage.addChild(hs);
 	}
-	
+
 	function deleteRod(bitmap) {
 		createjs.Tween.get(bitmap)
 		.to({alpha:0, visible:false}, 500);
@@ -805,10 +805,10 @@
 		// this set makes it so the stage only re-renders when an event handler indicates a change has happened.
 		if (update) {
 			update = false; // only update once
-			stage.update(event);		
+			stage.update(event);
 		}
 	}
-	
+
 function getParameterByName(name, url) {
     if (!url) url = window.location.href;
     name = name.replace(/[\[\]]/g, "\\$&");
@@ -824,7 +824,7 @@ function getOut() {
 	var outText = "VM::"+qn+"::"+btoa(JSON.stringify(saveState()));
 		console.log(outText);
 		parent.postMessage("VM::"+qn+"::"+btoa(JSON.stringify(saveState())),'*');
-	}	
+	}
 }
 
 function saveState() {
@@ -837,7 +837,7 @@ function saveState() {
 		saveChip.val = chips[i].val;
 		chippies[i] = saveChip;
 	}
-		
+
 	var state = {
 		chippies : chippies,
 		chipCount: chipCount,
