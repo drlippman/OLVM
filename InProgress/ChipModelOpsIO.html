@@ -402,6 +402,7 @@
 		this.onTheMove = false;
 		tweensOnTheRun--;
 		kill();
+		getOut();
 	}
 
     function drawZero() {
@@ -824,7 +825,7 @@ function getParameterByName(name, url) {
 function getOut() {
 	if (qn != null) {
 	var outText = "VM::"+qn+"::"+btoa(JSON.stringify(saveState()));
-		console.log(outText);
+		console.log(chips);
 		parent.postMessage("VM::"+qn+"::"+btoa(JSON.stringify(saveState())),'*');
 	}
 }
