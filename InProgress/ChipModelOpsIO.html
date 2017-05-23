@@ -32,6 +32,7 @@
 	var snapToGrid = true;
 	var tweensOnTheRun = 0;
 	var score = 1;
+	var feedback = "Whoot Whoot";
 
 	function init() {
 		if (getParameterByName("state") != null) {
@@ -849,7 +850,8 @@ function saveState() {
 		currentNegCol: currentNegCol,
 		currentPosRow: currentPosRow,
 		currentNegRow: currentNegRow,
-		score: score
+		score: score,
+		feedback: feedback
 	};
 	return state;
 }
