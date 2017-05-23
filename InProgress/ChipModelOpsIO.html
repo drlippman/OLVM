@@ -187,6 +187,7 @@
 				else
 					c.alpha = .25;
 			}
+			getOut();
 		});
 		c.on("pressup", function (evt) {
 			if (c.onTheMove)
@@ -220,6 +221,7 @@
 					currentNegCol = c.x + 45;
 				}
 			}
+			getOut();
 		});
 		c.on("pressmove", function (evt) {
 			if (c.onTheMove)
