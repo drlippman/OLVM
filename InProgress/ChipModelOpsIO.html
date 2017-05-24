@@ -10,7 +10,7 @@
 <script id="editable">
 	var canvas, stage, container;
 	var savedBounds;
-	var num1, num2, ops;
+	var num1 = 4, num2 = 2, ops;
 	var qn = null;
 	var chips = [];
 	var savedChips = [];
@@ -31,8 +31,9 @@
 	var questionText = "";
 	var snapToGrid = true;
 	var tweensOnTheRun = 0;
-	var score = 1;
+	var score = 0;
 	var feedback = "Whoot Whoot";
+	var savePoint = 0;
 
 	function init() {
 		if (getParameterByName("state") != null) {
@@ -55,7 +56,7 @@
 				console.log(num1 +"::"+num2+"::"+op);
 			}
 			if (typeof inParams.qn != "undefined") {
-			  qn = inParams.qn;
+				qn = inParams.qn;
 				console.log("qn:"+qn);
 			}
 		}
@@ -94,8 +95,6 @@
         stage.addChild(drawChip(250,90,"RED",-1));
         stage.addChild(drawChip(200,90,"YELLOW",1));
         drawZero();
-//       stage.addChild(drawChip(310,80,"RED",-1));
-//       stage.addChild(drawChip(310,40,"YELLOW",1));
 
 		if (qn != null) {
 			for (var i = 0; i < savedChips.length; i++) {
@@ -133,6 +132,7 @@
 		for (var i = 0; i < chips.length; i++)
 			chips[i].alpha = 1;
 	}
+	
 	function drawSavedChip(chip) {
 		var color = "RED";
 		if (chip.val == 1)
@@ -200,7 +200,7 @@
 			if (c.x < 10 || c.x  > 580 || c.y < 100 || c.y > 350) {
 				if (c.index != -1) {
 //					chips.splice(c.index,1);
-					deleteRod(c);
+					deleteChip(c);
 				}
 				else {
 					tweensOnTheRun++;
@@ -236,6 +236,7 @@
 		chips.push(c);
 		return c;
 	}
+	
 	function drawChip(xloc,yloc,color,val) {
 		var c = new createjs.Container();
 		var bg = new createjs.Shape();
@@ -334,7 +335,7 @@
 			if (c.x < 10 || c.x  > 580 || c.y < 100 || c.y > 350) {
 				if (c.index != -1) {
 //					chips.splice(c.index,1);
-					deleteRod(c);
+					deleteChip(c);
 				}
 				else {
 					tweensOnTheRun++;
@@ -369,15 +370,11 @@
 			getOut();
 
 		});
-
-
-		// the pressmove event is dispatched when the mouse moves after a mousedown on the target until the mouse is released.
 		c.on("pressmove", function (evt) {
 			if (c.onTheMove)
 				return;
 			this.x = evt.stageX + this.offset.x;
 			this.y = evt.stageY + this.offset.y;
-			// indicate that the stage should be updated on the next tick:
 			update = true;
 		});
 		return c;
@@ -474,36 +471,7 @@
 			getOut();
 
 		});
-/*		c.on("click", function (evt) {
-			var now = new Date().getTime();
-			var timesince = now - downTime;
-			if (timesince > 400) {
-				console.log("to slow for click");
-				clickCount = 0;
-				downTime = now;
-				return;
-			}
-			if (Math.abs(c.oldX - c.x) > 2  || Math.abs(c.oldY - c.y) > 2)
-				return;
-			clickCount++;
-			if (c.y < 100) {
-				if (currentPosCol > 540 || currentNegCol > 540)
-					return;
-				var chip1 = drawChip(300,50,"YELLOW",1);
-				var chip2 = drawChip(300,80,"RED",-1);
-				stage.addChild(chip1);
-				stage.addChild(chip2);
-				placeZeroChips(chip1,chip2);
-				chip1.index = chipCount;
-				chipCount++;
-				chips.push(chip1);
-				chip2.index = chipCount;
-				chipCount++;
-				chips.push(chip2);
-			}
-			getOut();
-		});
-*/
+
 		stage.addChild(c);
 	}
 
@@ -802,9 +770,21 @@
 		stage.addChild(hs);
 	}
 
-	function deleteRod(bitmap) {
-		createjs.Tween.get(bitmap)
-		.to({alpha:0, visible:false}, 500);
+	function deleteChip(chip) {
+		createjs.Tween.get(chip)
+		.to({alpha:0, visible:false}, 500)
+		.call(deleteChipComplete,[chip]);
+	}
+	function deleteChipComplete(chip) {
+		for (var i = 0; i < chips.length; i++) {
+			if (chip == chips[i]) {
+				chips.splice(i,1);
+				break;
+			} 
+		}
+		chipCount--;
+		stage.removeChild(chip);
+		getOut();
 	}
 	function tick(event) {
 		// this set makes it so the stage only re-renders when an event handler indicates a change has happened.
@@ -825,14 +805,18 @@ function getParameterByName(name, url) {
 }
 
 function getOut() {
-	if (qn != null) {
+//	if (qn != null) {
 	var outText = "VM::"+qn+"::"+btoa(JSON.stringify(saveState()));
-		console.log(chips);
-		parent.postMessage("VM::"+qn+"::"+btoa(JSON.stringify(saveState())),'*');
-	}
+	
+		console.log(score + "::" + savePoint);
+	//	parent.postMessage("VM::"+qn+"::"+btoa(JSON.stringify(saveState())),'*');
+	//}
 }
 
 function saveState() {
+	var reportscore = 0;
+	var posChips = 0, negChips = 0;
+
 	var chippies = [];
 	for (var i = 0; i < chips.length; i++) {
 		var saveChip = new Object();
@@ -841,8 +825,25 @@ function saveState() {
 		saveChip.alpha = chips[i].alpha;
 		saveChip.val = chips[i].val;
 		chippies[i] = saveChip;
+		if (chips[i].val == 1)
+			posChips++;
+		else	
+			negChips++;
 	}
-
+	console.log(posChips + "::" + negChips);
+	if (posChips == 4 && negChips == 2) 
+		score = 1;
+	else 
+		score = 0;
+	if (score == 1 && savePoint == 0) {
+		reportscore = 1;
+		savePoint = 1;
+		console.log("Writing Save Point");
+	}
+	if (score == 0 && savePoint == 1) {
+		reportscore = 0;
+		savePoint = 0;
+	}
 	var state = {
 		chippies : chippies,
 		chipCount: chipCount,
@@ -851,7 +852,8 @@ function saveState() {
 		currentPosRow: currentPosRow,
 		currentNegRow: currentNegRow,
 		score: score,
-		feedback: feedback
+		feedback: feedback,
+		reportscore : reportscore
 	};
 	return state;
 }
