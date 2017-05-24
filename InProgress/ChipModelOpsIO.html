@@ -806,8 +806,8 @@ function getParameterByName(name, url) {
 
 function getOut() {
 	if (qn != null) {
-		var outText = "VM::"+qn+"::"+btoa(JSON.stringify(saveState()));
-		console.log(score + "::" + savePoint);
+//		var outText = "VM::"+qn+"::"+btoa(JSON.stringify(saveState()));
+//		console.log(score + "::" + savePoint);
 		parent.postMessage("VM::"+qn+"::"+btoa(JSON.stringify(saveState())),'*');
 	}
 }
@@ -852,7 +852,7 @@ function saveState() {
 		currentNegRow: currentNegRow,
 		score: score,
 		feedback: feedback,
-		reportscore : reportscore
+		reportscore: reportscore
 	};
 	return state;
 }
