@@ -295,6 +295,7 @@
 					c.alpha = 1;
 				else
 					c.alpha = .25;
+				 getOut();
 			} else if (c.y <= 100) {
 			  if ((c.val == 1 && currentPosCol > 540) ||
 			      (c.val == -1 && currentNegCol > 540))
@@ -323,7 +324,7 @@
 				chips.push(c);
 				stage.addChild(drawChip(xloc,yloc,color,val));
 			}
- 			getOut();
+
 		});
 		c.on("pressup", function (evt) {
 			if (c.onTheMove)
@@ -829,7 +830,6 @@ function saveState() {
 		else	
 			negChips++;
 	}
-	console.log(posChips + "::" + negChips);
 	if (posChips == 4 && negChips == 2) 
 		score = 1;
 	else 
