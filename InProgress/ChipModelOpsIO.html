@@ -805,12 +805,11 @@ function getParameterByName(name, url) {
 }
 
 function getOut() {
-//	if (qn != null) {
-	var outText = "VM::"+qn+"::"+btoa(JSON.stringify(saveState()));
-	
+	if (qn != null) {
+		var outText = "VM::"+qn+"::"+btoa(JSON.stringify(saveState()));
 		console.log(score + "::" + savePoint);
-	//	parent.postMessage("VM::"+qn+"::"+btoa(JSON.stringify(saveState())),'*');
-	//}
+		parent.postMessage("VM::"+qn+"::"+btoa(JSON.stringify(saveState())),'*');
+	}
 }
 
 function saveState() {
